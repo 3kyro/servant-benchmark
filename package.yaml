@@ -23,9 +23,14 @@ dependencies:
 - base >= 4.7 && < 5
 - text
 - servant
+- http-types
+- QuickCheck
+- aeson
 
 library:
   source-dirs: src
+  ghc-options:
+  - -Wall
 
 executables:
   servant-wrt-exe:
@@ -35,6 +40,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Wall
     dependencies:
     - servant-wrt
 
