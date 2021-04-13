@@ -16,7 +16,7 @@ import Data.Kind (Type)
 import qualified Data.Text as T
 import Endpoint (Endpoint (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import Servant.API (ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
+import Servant.API (EmptyAPI, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
 import Test.QuickCheck (Arbitrary (arbitrary), generate)
 
 class HasEndpoint (api :: k) where
@@ -45,3 +45,6 @@ instance forall contentTypes a. (Arbitrary a, ToJSON a) => HasEndpoint (ReqBody 
     getEndpoint _ = do
         value <- generate (arbitrary @a)
         pure $ MkEndpoint mempty mempty $ Just $ toJSON value
+
+instance HasEndpoint EmptyAPI where
+    getEndpoint _ = pure $ mempty

@@ -18,6 +18,7 @@ main = do
 type API =
     "user" :> Get '[JSON] String
         :<|> "post" :> ReqBody '[JSON] Int :> Post '[JSON] String
+        :<|> EmptyAPI
 
 type Test =
     "post" :> ReqBody '[JSON] Int :> Post '[JSON] String

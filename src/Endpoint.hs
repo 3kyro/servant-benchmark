@@ -28,3 +28,6 @@ instance Semigroup Endpoint where
             (method a <> method b)
             -- left biased alternative for request value
             (requestValue a <|> requestValue b)
+
+instance Monoid Endpoint where
+    mempty = MkEndpoint mempty mempty Nothing
