@@ -1,0 +1,10 @@
+cradle:
+    stack:
+        - path: "./app"
+          component: "servant-wrt:exe:servant-wrt-exe"
+        - path: "./src"
+          component: "servant-wrt:lib"
+        - path: "./test"
+          component: "server:test:server-test"
+
+
