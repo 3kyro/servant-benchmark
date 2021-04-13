@@ -16,12 +16,14 @@ import Data.Kind (Type)
 import qualified Data.Text as T
 import Endpoint (Endpoint (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import Servant.API (EmptyAPI, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
+import Servant.API (Capture, CaptureAll, EmptyAPI, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
 import Test.QuickCheck (Arbitrary (arbitrary), generate)
 
+-- | An Endpoint in the interpreted API
 class HasEndpoint (api :: k) where
     getEndpoint :: Proxy (api :: k) -> IO Endpoint
 
+-- Endpoint parts are constructed using `:>`
 instance forall k (a :: k) (b :: Type). (HasEndpoint a, HasEndpoint b) => HasEndpoint (a :> b) where
     getEndpoint _ = do
         left <- getEndpoint (Proxy @a)
@@ -34,6 +36,14 @@ instance forall (a :: Symbol). (KnownSymbol a) => HasEndpoint a where
       where
         symbol :: Proxy a -> String
         symbol proxy' = symbolVal proxy'
+
+-- CaptureAll: Ignore all capture parts for now
+instance forall (sym :: Symbol) (a :: Type). HasEndpoint (CaptureAll sym a) where
+    getEndpoint _ = mempty
+
+instance forall (sym :: Symbol) (a :: Type). HasEndpoint (Capture sym a) where
+    getEndpoint _ = mempty
+
 instance
     forall method statusCode contentTypes a.
     (ReflectMethod method, Arbitrary a, ToJSON a) =>

@@ -7,6 +7,7 @@
 module Main where
 
 import Data.Data (Proxy (..))
+import qualified Data.Text as T
 import Lib
 import Servant.API
 
@@ -19,6 +20,8 @@ type API =
     "user" :> Get '[JSON] String
         :<|> "post" :> ReqBody '[JSON] Int :> Post '[JSON] String
         :<|> EmptyAPI
+        :<|> "books" :> Capture "isbn" T.Text :> Get '[JSON] String
+        :<|> "src" :> CaptureAll "segments" T.Text :> Get '[JSON] String
 
 type Test =
     "post" :> ReqBody '[JSON] Int :> Post '[JSON] String
