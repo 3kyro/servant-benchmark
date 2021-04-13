@@ -16,7 +16,8 @@ import Data.Kind (Type)
 import qualified Data.Text as T
 import Endpoint (Endpoint (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import Servant.API (Capture, CaptureAll, EmptyAPI, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
+import qualified Header as H
+import Servant.API (Capture, CaptureAll, EmptyAPI, Header, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
 import Test.QuickCheck (Arbitrary (arbitrary), generate)
 
 -- | An Endpoint in the interpreted API
@@ -32,7 +33,7 @@ instance forall k (a :: k) (b :: Type). (HasEndpoint a, HasEndpoint b) => HasEnd
 
 instance forall (a :: Symbol). (KnownSymbol a) => HasEndpoint a where
     getEndpoint proxy =
-        pure $ MkEndpoint [T.pack $ symbol proxy] mempty Nothing
+        pure $ MkEndpoint [T.pack $ symbol proxy] mempty Nothing mempty
       where
         symbol :: Proxy a -> String
         symbol proxy' = symbolVal proxy'
@@ -44,17 +45,24 @@ instance forall (sym :: Symbol) (a :: Type). HasEndpoint (CaptureAll sym a) wher
 instance forall (sym :: Symbol) (a :: Type). HasEndpoint (Capture sym a) where
     getEndpoint _ = mempty
 
+instance forall (sym :: Symbol) (a :: Type). (KnownSymbol sym, Arbitrary a, ToJSON a) => HasEndpoint (Header sym a) where
+    getEndpoint _ = do
+        let symbol = T.pack $ symbolVal (Proxy @sym)
+        value <- generate $ arbitrary @a
+        let header = H.MkHeader symbol $ toJSON value
+        pure $ mempty{headers = [header]}
+
 instance
     forall method statusCode contentTypes a.
     (ReflectMethod method, Arbitrary a, ToJSON a) =>
     HasEndpoint (Verb method statusCode contentTypes a)
     where
-    getEndpoint _ = pure $ MkEndpoint mempty (Just $ reflectMethod (Proxy @method)) Nothing
+    getEndpoint _ = pure $ MkEndpoint mempty (Just $ reflectMethod (Proxy @method)) Nothing mempty
 
 instance forall contentTypes a. (Arbitrary a, ToJSON a) => HasEndpoint (ReqBody contentTypes a) where
     getEndpoint _ = do
         value <- generate (arbitrary @a)
-        pure $ MkEndpoint mempty mempty $ Just $ toJSON value
+        pure $ MkEndpoint mempty mempty (Just $ toJSON value) mempty
 
 instance HasEndpoint EmptyAPI where
-    getEndpoint _ = pure $ mempty
+    getEndpoint _ = pure mempty

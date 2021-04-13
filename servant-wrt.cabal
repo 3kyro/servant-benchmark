@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 777c990ea55f67aff9a2d1d94eea1ef730443120ad3df187ebc96bd6e65da3f3
+-- hash: 957cfc205908577686daf2726d8b4238785e773587833260015fa6d0f01ed590
 
 name:           servant-wrt
 version:        0.1.0.0
@@ -30,6 +30,7 @@ library
       Endpoint
       HasAPI
       HasEndpoint
+      Header
       Lib
   other-modules:
       Paths_servant_wrt

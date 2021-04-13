@@ -3,6 +3,7 @@ module Endpoint where
 import Control.Applicative ((<|>))
 import Data.Aeson (Value)
 import qualified Data.Text as T
+import Header (Header)
 import Network.HTTP.Types (Method)
 
 {- | An API endpoint.
@@ -18,6 +19,7 @@ data Endpoint = MkEndpoint
       -- eg. "user" :> ReqBody '[JSON] Text :> ReqBody '[JSON] Int :> Get '[JSON] User
       -- will produce only a `Text` based request value
       requestValue :: Maybe Value
+    , headers :: [Header]
     }
     deriving (Show, Eq)
 
@@ -28,6 +30,7 @@ instance Semigroup Endpoint where
             (method a <> method b)
             -- left biased alternative for request value
             (requestValue a <|> requestValue b)
+            (headers a <> headers b)
 
 instance Monoid Endpoint where
-    mempty = MkEndpoint mempty mempty Nothing
+    mempty = MkEndpoint mempty mempty Nothing mempty

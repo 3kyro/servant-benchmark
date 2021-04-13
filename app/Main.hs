@@ -18,7 +18,7 @@ main = do
 
 type API =
     "user" :> Get '[JSON] String
-        :<|> "post" :> ReqBody '[JSON] Int :> Post '[JSON] String
+        :<|> "post" :> Header "time" Int :> ReqBody '[JSON] Int :> Post '[JSON] String
         :<|> EmptyAPI
         :<|> "books" :> Capture "isbn" T.Text :> Get '[JSON] String
         :<|> "src" :> CaptureAll "segments" T.Text :> Get '[JSON] String
