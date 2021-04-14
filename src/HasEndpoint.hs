@@ -17,7 +17,7 @@ import qualified Data.Text as T
 import Endpoint (Endpoint (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import qualified Header as H
-import Servant.API (Capture, CaptureAll, EmptyAPI, Header, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
+import Servant.API (Capture, CaptureAll, EmptyAPI, Header, HttpVersion, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
 import Test.QuickCheck (Arbitrary (arbitrary), generate)
 
 -- | An Endpoint in the interpreted API
@@ -51,6 +51,9 @@ instance forall (sym :: Symbol) (a :: Type). (KnownSymbol sym, Arbitrary a, ToJS
         value <- generate $ arbitrary @a
         let header = H.MkHeader symbol $ toJSON value
         pure $ mempty{headers = [header]}
+
+instance HasEndpoint HttpVersion where
+    getEndpoint _ = mempty
 
 instance
     forall method statusCode contentTypes a.
