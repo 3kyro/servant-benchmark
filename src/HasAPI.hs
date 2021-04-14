@@ -13,7 +13,7 @@ import Endpoint (Endpoint)
 import HasEndpoint (HasEndpoint (..))
 import Servant.API ((:<|>))
 
-class HasAPI (api :: *) where
+class HasAPI (api :: Type) where
     getAPI :: Proxy api -> IO [Endpoint]
 
 instance {-# OVERLAPPING #-} (HasEndpoint a, HasAPI b) => HasAPI ((a :: Type) :<|> (b :: Type)) where

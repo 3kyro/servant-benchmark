@@ -41,6 +41,7 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -Wall
+    - -fprint-potential-instances
     dependencies:
     - servant-wrt
 
