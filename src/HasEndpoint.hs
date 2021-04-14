@@ -17,26 +17,42 @@ import qualified Data.Text as T
 import Endpoint (Endpoint (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import qualified Header as H
-import Servant.API (Capture, CaptureAll, EmptyAPI, Header, HttpVersion, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
+import Servant.API (Capture, CaptureAll, EmptyAPI, Header, HttpVersion, QueryFlag, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
 import Test.QuickCheck (Arbitrary (arbitrary), generate)
 
 -- | An Endpoint in the interpreted API
-class HasEndpoint (api :: k) where
-    getEndpoint :: Proxy (api :: k) -> IO Endpoint
+class HasEndpoint (api :: Type) where
+    getEndpoint :: Proxy (api :: Type) -> IO Endpoint
 
 -- Endpoint parts are constructed using `:>`
-instance forall k (a :: k) (b :: Type). (HasEndpoint a, HasEndpoint b) => HasEndpoint (a :> b) where
+instance forall (a :: Type) (b :: Type). (HasEndpoint a, HasEndpoint b) => HasEndpoint (a :> b) where
     getEndpoint _ = do
         left <- getEndpoint (Proxy @a)
         right <- getEndpoint (Proxy @b)
         pure $ left <> right
 
-instance forall (a :: Symbol). (KnownSymbol a) => HasEndpoint a where
-    getEndpoint proxy =
-        pure $ MkEndpoint [T.pack $ symbol proxy] mempty Nothing mempty
+instance
+    forall (sym :: Symbol) (rest :: Type).
+    (KnownSymbol sym, HasEndpoint rest) =>
+    HasEndpoint (sym :> rest)
+    where
+    getEndpoint _ = do
+        let left = mempty{path = [T.pack $ symbolVal (Proxy @sym)]}
+        right <- getEndpoint (Proxy @rest)
+        pure $ left <> right
+
+instance
+    forall (path :: Symbol) (sym :: Symbol) (rest :: Type).
+    (KnownSymbol path, KnownSymbol sym, HasEndpoint rest) =>
+    HasEndpoint (path :> QueryFlag sym :> rest)
+    where
+    getEndpoint _ = do
+        let left = mempty{path = [T.pack $ qPath ++ "?" ++ qFlag]}
+        right <- getEndpoint (Proxy @rest)
+        pure $ left <> right
       where
-        symbol :: Proxy a -> String
-        symbol proxy' = symbolVal proxy'
+        qPath = symbolVal (Proxy @path)
+        qFlag = symbolVal (Proxy @sym)
 
 -- CaptureAll: Ignore all capture parts for now
 instance forall (sym :: Symbol) (a :: Type). HasEndpoint (CaptureAll sym a) where
@@ -60,12 +76,12 @@ instance
     (ReflectMethod method, Arbitrary a, ToJSON a) =>
     HasEndpoint (Verb method statusCode contentTypes a)
     where
-    getEndpoint _ = pure $ MkEndpoint mempty (Just $ reflectMethod (Proxy @method)) Nothing mempty
+    getEndpoint _ = pure $ mempty{method = Just $ reflectMethod (Proxy @method)}
 
 instance forall contentTypes a. (Arbitrary a, ToJSON a) => HasEndpoint (ReqBody contentTypes a) where
     getEndpoint _ = do
         value <- generate (arbitrary @a)
-        pure $ MkEndpoint mempty mempty (Just $ toJSON value) mempty
+        pure $ mempty{requestValue = Just $ toJSON value}
 
 instance HasEndpoint EmptyAPI where
     getEndpoint _ = pure mempty

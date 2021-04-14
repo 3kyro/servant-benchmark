@@ -20,7 +20,7 @@ type API =
     "user" :> Get '[JSON] String
         :<|> "post" :> Header "time" Int :> ReqBody '[JSON] Int :> Post '[JSON] String
         :<|> EmptyAPI
-        :<|> "books" :> HttpVersion :> Capture "isbn" T.Text :> Get '[JSON] String
+        :<|> "books" :> QueryFlag "published" :> HttpVersion :> Capture "isbn" T.Text :> Get '[JSON] String
         :<|> "src" :> CaptureAll "segments" T.Text :> Get '[JSON] String
 
 type Test =
