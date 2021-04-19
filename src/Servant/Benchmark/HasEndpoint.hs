@@ -16,7 +16,7 @@ import Data.Data (Proxy (..))
 import Data.Kind (Type)
 import Data.List (foldl')
 import qualified Data.Text as T
-import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
+import GHC.TypeLits (KnownSymbol, Nat, Symbol, symbolVal)
 import Servant.API
 import Servant.Benchmark.Endpoint (Endpoint (..), mkHeader)
 import Servant.Benchmark.Generator (Generator, (:>:) (..))
@@ -25,11 +25,10 @@ import Test.QuickCheck (generate, listOf)
 
 -- | HasEndpoint provides type level interpretation of an API Endpoint
 class HasEndpoint (api :: Type) where
-    getEndpoint :: Proxy (api :: Type) -> Generator api -> IO Endpoint
+    getEndpoint :: Proxy api -> Generator api -> IO Endpoint
     weight :: Proxy api -> Generator api -> Word
 
 instance
-    {-# OVERLAPPING #-}
     forall (sym :: Symbol) (rest :: Type).
     (KnownSymbol sym, HasEndpoint rest) =>
     HasEndpoint (sym :> rest)
@@ -40,8 +39,7 @@ instance
     weight _ gen = weight (Proxy @rest) gen
 
 instance
-    {-# OVERLAPPING #-}
-    forall method statusCode contentTypes a.
+    forall k (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type).
     (ReflectMethod method) =>
     HasEndpoint (Verb method statusCode contentTypes a)
     where
@@ -53,8 +51,7 @@ instance
     weight _ n = n
 
 instance
-    {-# OVERLAPPING #-}
-    forall contentTypes a rest.
+    forall (contentTypes :: [Type]) (a :: Type) (rest :: Type).
     (ToJSON a, HasEndpoint rest) =>
     HasEndpoint (ReqBody contentTypes a :> rest)
     where
@@ -65,7 +62,6 @@ instance
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
-    {-# OVERLAPPING #-}
     forall (params :: Symbol) (a :: Type) (rest :: Type).
     (KnownSymbol params, Show a, HasEndpoint rest) =>
     HasEndpoint (QueryParams params a :> rest)
@@ -83,7 +79,6 @@ instance
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
-    {-# OVERLAPPING #-}
     forall (sym :: Symbol) (rest :: Type).
     (KnownSymbol sym, HasEndpoint rest) =>
     HasEndpoint (QueryFlag sym :> rest)
@@ -94,7 +89,6 @@ instance
     weight _ gen = weight (Proxy @rest) gen
 
 instance
-    {-# OVERLAPPING #-}
     forall (sym :: Symbol) (a :: Type) (rest :: Type).
     (Show a, HasEndpoint rest) =>
     HasEndpoint (Capture sym a :> rest)
@@ -106,7 +100,6 @@ instance
 
 -- CaptureAll: Ignore all capture parts for now
 instance
-    {-# OVERLAPPING #-}
     forall (sym :: Symbol) (a :: Type) (rest :: Type).
     (Show a, HasEndpoint rest) =>
     HasEndpoint (CaptureAll sym a :> rest)
@@ -117,7 +110,6 @@ instance
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
-    {-# OVERLAPPING #-}
     forall (sym :: Symbol) (a :: Type) (rest :: Type).
     (KnownSymbol sym, Show a, HasEndpoint rest) =>
     HasEndpoint (Header sym a :> rest)
@@ -130,7 +122,6 @@ instance
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
-    {-# OVERLAPPING #-}
     forall (rest :: Type).
     HasEndpoint rest =>
     HasEndpoint (HttpVersion :> rest)
