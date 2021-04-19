@@ -14,5 +14,5 @@ import Test.QuickCheck.Gen (generate)
 encodeBasicAuth :: (a -> BasicAuthData) -> Gen a -> IO Header
 encodeBasicAuth f gen = do
     basicAuthData <- f <$> generate gen
-    let bs64 = BS8.pack "Basic" <> encode (basicAuthUsername basicAuthData <> BS8.singleton ':' <> basicAuthPassword basicAuthData)
+    let bs64 = BS8.pack "Basic " <> encode (basicAuthUsername basicAuthData <> BS8.singleton ':' <> basicAuthPassword basicAuthData)
     pure (hAuthorization, bs64)

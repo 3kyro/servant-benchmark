@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d63b555b2a71d05df68c49d22619c46c2aa3d60b283a2e279edd998c38713eae
+-- hash: 0ebf1fc9a80a30ead825f7378a2e1fa59163ac7866249333ba42cae28a97499b
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -91,6 +91,7 @@ test-suite servant-benchmark-test
     , base64-bytestring
     , bytestring
     , case-insensitive
+    , hspec
     , http-types
     , servant
     , servant-benchmark

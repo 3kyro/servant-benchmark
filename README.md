@@ -33,7 +33,7 @@ let generator =
     1
     :<|> arbitrary :>: 2
     :<|> pure 1001 :>: arbitrary :>: 2
-    :<|> elements ["title", "contents", "post"] :>: 1
+    :<|> elements ["title", "contents", "post"] :>: 4
     :<|> 0
 ````
 
@@ -45,11 +45,12 @@ we assume `Referer` has an `Arbitrary` instance to provide a random value. The e
 finishes with the weight indication.
 
 The "users" endpoint requires two different request values. An Integer capture representing a user
-id as well as a `User`. We hard-code the user id to `1001` using the monadic `pure` and assume that
-`User` has an `Arbitrary` instance. We finish with the endpoint's weight as necessary.
+id as well as a `User` value. We hard-code the user id to `1001` using the monadic `pure` and assume that
+`User` has an `Arbitrary` instance to produce a random value. We finish with the endpoint's weight as necessary.
 
 The "post" endpoint requires a `Text` query parameter. We provide a fixed set of possible values
-using the `elements` function from the `QuickCheck` package.
+using the `elements` function from the `QuickCheck` package. With a weight of 4, four random values
+from the specified set will be produced.
 
 Finally our API provides a `Raw` endpoint for serving static files, but we'd rather not benchmark
 it. Providing a 0 weight ensures that no request will be generated 
@@ -65,10 +66,15 @@ example:
 type privateAPI = "private" :> BasicAuth "foo-realm" User :> PrivateAPI
 
 toBasicAuthData :: User -> BasicAuthData
-toBasicAuthData = ... --implementation 
+toBasicAuthData user = ... 
 
 -- assuming `User` has an `Arbitrary` instance
 let generator = toBasicAuthData :>: arbitrary :>: 1
 ````
 
-The information will be encoded as an `Authorizqtion` header.
+The information will be encoded as an `Authorization` header.
+
+## Next steps
+
+* Provide support for *servant-auth* combinators
+* Expand the support for benchmarking frameworks

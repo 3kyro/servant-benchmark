@@ -189,7 +189,7 @@ instance
         (<>)
             mempty{headers = [authHeader]}
             <$> getEndpoint (Proxy @rest) genRest
-    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
+    weight _ (_ :>: _ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
     forall (sym :: Symbol) (rest :: Type).
