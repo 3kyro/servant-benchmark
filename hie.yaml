@@ -1,9 +1,9 @@
 cradle:
     stack:
         - path: "./app"
-          component: "servant-wrt:exe:servant-wrt-exe"
+          component: "servant-benchmark:exe:servant-benchmark-exe"
         - path: "./src"
-          component: "servant-wrt:lib"
+          component: "servant-benchmark:lib"
         - path: "./test"
           component: "server:test:server-test"
 

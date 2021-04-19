@@ -1,10 +1,10 @@
-name:                servant-wrt
+name:                servant-benchmark
 version:             0.1.0.0
-github:              "githubuser/servant-wrt"
+github:              "3kyro/servant-benchmark"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2021 Author name here"
+author:              "Kyriakos Papachrysanthou"
+maintainer:          "papachrysanthou.k@gmaim.com"
+copyright:           "2021 Kyriakos Papachrysanthou"
 
 extra-source-files:
 - README.md
@@ -35,7 +35,7 @@ library:
   - -Wall
 
 executables:
-  servant-wrt-exe:
+  servant-benchmark-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -45,10 +45,10 @@ executables:
     - -Wall
     - -fprint-potential-instances
     dependencies:
-    - servant-wrt
+    - servant-benchmark
 
 tests:
-  servant-wrt-test:
+  servant-benchmark-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -56,4 +56,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - servant-wrt
+    - servant-benchmark
