@@ -25,9 +25,13 @@ dependencies:
 - servant
 - servant-server
 - http-types
+- case-insensitive
+- utf8-string
 - QuickCheck
 - aeson
 - warp
+- base64-bytestring
+- bytestring
 
 library:
   source-dirs: src

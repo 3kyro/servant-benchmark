@@ -11,6 +11,7 @@
 
 module Servant.Benchmark.Internal.HasEndpoint where
 
+import Control.Monad (liftM2)
 import Data.Aeson (ToJSON (toJSON))
 import Data.Data (Proxy (..))
 import Data.Kind (Type)
@@ -18,10 +19,10 @@ import Data.List (foldl')
 import qualified Data.Text as T
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Servant.API
-import Servant.Benchmark.Internal.Endpoint (Endpoint (..))
+import Servant.Benchmark.Internal.BasicAuth (encodeBasicAuth)
+import Servant.Benchmark.Internal.Endpoint (Endpoint (..), mkHeader)
 import Servant.Benchmark.Internal.Generator (Generator, (:>:) (..))
-import qualified Servant.Benchmark.Internal.Header as H
-import Test.QuickCheck (Arbitrary, generate, listOf)
+import Test.QuickCheck (generate, listOf)
 
 -- | HasEndpoint provides type level interpretation of an API Endpoint
 class HasEndpoint (api :: Type) where
@@ -42,7 +43,7 @@ instance
 instance
     {-# OVERLAPPING #-}
     forall method statusCode contentTypes a.
-    (ReflectMethod method, Arbitrary a, ToJSON a) =>
+    (ReflectMethod method) =>
     HasEndpoint (Verb method statusCode contentTypes a)
     where
     getEndpoint _ _ =
@@ -55,7 +56,7 @@ instance
 instance
     {-# OVERLAPPING #-}
     forall contentTypes a rest.
-    (Arbitrary a, ToJSON a, HasEndpoint rest) =>
+    (ToJSON a, HasEndpoint rest) =>
     HasEndpoint (ReqBody contentTypes a :> rest)
     where
     getEndpoint _ (genLeft :>: genRest) = do
@@ -67,7 +68,7 @@ instance
 instance
     {-# OVERLAPPING #-}
     forall (params :: Symbol) (a :: Type) (rest :: Type).
-    (KnownSymbol params, Arbitrary a, Show a, HasEndpoint rest) =>
+    (KnownSymbol params, Show a, HasEndpoint rest) =>
     HasEndpoint (QueryParams params a :> rest)
     where
     getEndpoint _ (genLeft :>: genRest) = do
@@ -119,13 +120,13 @@ instance
 instance
     {-# OVERLAPPING #-}
     forall (sym :: Symbol) (a :: Type) (rest :: Type).
-    (KnownSymbol sym, Arbitrary a, ToJSON a, HasEndpoint rest) =>
+    (KnownSymbol sym, Show a, HasEndpoint rest) =>
     HasEndpoint (Header sym a :> rest)
     where
     getEndpoint _ (gen :>: genRest) = do
-        let symbol = T.pack $ symbolVal (Proxy @sym)
+        let symbol = symbolVal (Proxy @sym)
         value <- generate gen
-        let header = H.MkHeader symbol $ toJSON value
+        let header = mkHeader symbol value
         (<>) mempty{headers = [header]} <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
@@ -145,7 +146,7 @@ instance HasEndpoint EmptyAPI where
 
 instance
     forall (a :: Type) (rest :: Type).
-    (Show a, Arbitrary a, ToJSON a, HasEndpoint rest) =>
+    (Show a, HasEndpoint rest) =>
     HasEndpoint (Fragment a :> rest)
     where
     getEndpoint _ (gen :>: genRest) = do
@@ -177,6 +178,18 @@ instance
     where
     getEndpoint _ gen = getEndpoint (Proxy @api) gen
     weight _ gen = weight (Proxy @api) gen
+
+instance
+    forall (realm :: Symbol) (userData :: Type) (rest :: Type).
+    (HasEndpoint rest) =>
+    HasEndpoint (BasicAuth realm userData :> rest)
+    where
+    getEndpoint _ (f :>: genUserData :>: genRest) = do
+        authHeader <- encodeBasicAuth f genUserData
+        (<>)
+            mempty{headers = [authHeader]}
+            <$> getEndpoint (Proxy @rest) genRest
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
     forall (sym :: Symbol) (rest :: Type).

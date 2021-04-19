@@ -4,9 +4,11 @@ module Servant.Benchmark.Internal.Endpoint where
 
 import Control.Applicative ((<|>))
 import Data.Aeson (Value)
+import Data.ByteString.UTF8 (fromString)
+import Data.CaseInsensitive (mk)
 import qualified Data.Text as T
 import Network.HTTP.Types (Method)
-import Servant.Benchmark.Internal.Header (Header)
+import Network.HTTP.Types.Header (Header)
 
 {- | An API endpoint.
 -
@@ -36,3 +38,8 @@ instance Semigroup Endpoint where
 
 instance Monoid Endpoint where
     mempty = MkEndpoint mempty mempty Nothing mempty
+
+-- Create a `Header` from a string and a value
+mkHeader :: Show a => String -> a -> Header
+mkHeader name value =
+    (mk $ fromString name, fromString $ show value)

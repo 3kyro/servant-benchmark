@@ -17,6 +17,7 @@ The `Generator` type must closely follow the structure of the *servant* API.
     * `CaptureAll`
     * `Header`
     * `Fragment`
+* For the `BasicAuth` combinator, see the dedicated section below 
 
 As an example, the following is a valid `Generator` for a contrived servant API
 
@@ -44,8 +45,8 @@ we assume `Referer` has an `Arbitrary` instance to provide a random value. The e
 finishes with the weight indication.
 
 The "users" endpoint requires two different request values. An Integer capture representing a user
-id as well as a `User`. We hardcode the user id to `1001` using the monadic `pure` and assume that
-`User` has an `Arbitrary` isntance. We finish with the endpoint's weight as necessary.
+id as well as a `User`. We hard-code the user id to `1001` using the monadic `pure` and assume that
+`User` has an `Arbitrary` instance. We finish with the endpoint's weight as necessary.
 
 The "post" endpoint requires a `Text` query parameter. We provide a fixed set of possible values
 using the `elements` function from the `QuickCheck` package.
@@ -53,3 +54,21 @@ using the `elements` function from the `QuickCheck` package.
 Finally our API provides a `Raw` endpoint for serving static files, but we'd rather not benchmark
 it. Providing a 0 weight ensures that no request will be generated 
 
+### Basic Auth
+
+A generator for an endpoint using a `BasicAuth` combinator requires both a function to convert the
+requested user data type to `BasicAuthData` as well as a `Gen` value for the requested user data. 
+
+example:
+
+````haskell
+type privateAPI = "private" :> BasicAuth "foo-realm" User :> PrivateAPI
+
+toBasicAuthData :: User -> BasicAuthData
+toBasicAuthData = ... --implementation 
+
+-- assuming `User` has an `Arbitrary` instance
+let generator = toBasicAuthData :>: arbitrary :>: 1
+````
+
+The information will be encoded as an `Authorizqtion` header.

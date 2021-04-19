@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 85279aa528ae818186ea74ad91e20d8421a63a4ec4f380cebf67e523e80727f4
+-- hash: d63b555b2a71d05df68c49d22619c46c2aa3d60b283a2e279edd998c38713eae
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -28,11 +28,11 @@ source-repository head
 library
   exposed-modules:
       Servant.Benchmark
+      Servant.Benchmark.Internal.BasicAuth
       Servant.Benchmark.Internal.Endpoint
       Servant.Benchmark.Internal.Generator
       Servant.Benchmark.Internal.HasEndpoint
       Servant.Benchmark.Internal.HasGenerator
-      Servant.Benchmark.Internal.Header
   other-modules:
       Paths_servant_benchmark
   hs-source-dirs:
@@ -42,10 +42,14 @@ library
       QuickCheck
     , aeson
     , base >=4.7 && <5
+    , base64-bytestring
+    , bytestring
+    , case-insensitive
     , http-types
     , servant
     , servant-server
     , text
+    , utf8-string
     , warp
   default-language: Haskell2010
 
@@ -60,11 +64,15 @@ executable servant-benchmark-exe
       QuickCheck
     , aeson
     , base >=4.7 && <5
+    , base64-bytestring
+    , bytestring
+    , case-insensitive
     , http-types
     , servant
     , servant-benchmark
     , servant-server
     , text
+    , utf8-string
     , warp
   default-language: Haskell2010
 
@@ -80,10 +88,14 @@ test-suite servant-benchmark-test
       QuickCheck
     , aeson
     , base >=4.7 && <5
+    , base64-bytestring
+    , bytestring
+    , case-insensitive
     , http-types
     , servant
     , servant-benchmark
     , servant-server
     , text
+    , utf8-string
     , warp
   default-language: Haskell2010

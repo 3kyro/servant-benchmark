@@ -36,6 +36,8 @@ type family Generator (api :: Type) where
     Generator (RemoteHost :> rest) = Generator rest
     Generator (IsSecure :> rest) = Generator rest
     Generator (WithNamedContext (name :: Symbol) (sub :: [Type]) (api :: Type)) = Generator api
+    Generator (BasicAuth (realm :: Symbol) (userData :: Type) :> rest) =
+        (userData -> BasicAuthData) :>: Gen userData :>: Generator rest
     Generator (Description (sym :: Symbol) :> rest) = Generator rest
     Generator (Summary (sym :: Symbol) :> rest) = Generator rest
     Generator Raw = Word
