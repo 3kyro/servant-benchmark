@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 700d1191b6bdae9f0859c06708f7dff5620c50ab5bec02e26ce72b7f6337eb39
+-- hash: 85279aa528ae818186ea74ad91e20d8421a63a4ec4f380cebf67e523e80727f4
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -27,12 +27,12 @@ source-repository head
 
 library
   exposed-modules:
-      Endpoint
-      Generator
-      HasEndpoint
-      HasGenerator
-      Header
-      Lib
+      Servant.Benchmark
+      Servant.Benchmark.Internal.Endpoint
+      Servant.Benchmark.Internal.Generator
+      Servant.Benchmark.Internal.HasEndpoint
+      Servant.Benchmark.Internal.HasGenerator
+      Servant.Benchmark.Internal.Header
   other-modules:
       Paths_servant_benchmark
   hs-source-dirs:

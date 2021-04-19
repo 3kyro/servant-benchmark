@@ -10,8 +10,8 @@
 module Main where
 
 import Data.Data (Proxy (..))
-import Lib
 import Servant.API
+import Servant.Benchmark
 import Servant.Server
 import Test.QuickCheck (arbitrary)
 

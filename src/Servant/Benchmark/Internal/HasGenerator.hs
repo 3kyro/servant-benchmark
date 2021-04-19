@@ -6,15 +6,15 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module HasGenerator where
+module Servant.Benchmark.Internal.HasGenerator where
 
 import Control.Monad (replicateM)
 import Data.Data (Proxy (..))
 import Data.Kind (Type)
-import Endpoint (Endpoint)
-import Generator (Generator)
-import HasEndpoint
 import Servant.API
+import Servant.Benchmark.Internal.Endpoint (Endpoint)
+import Servant.Benchmark.Internal.Generator (Generator)
+import Servant.Benchmark.Internal.HasEndpoint
 
 {- | HasGenerator provides combined type and value level interpretation of an API,
   producing corresponding `Endpoint` values.

@@ -9,7 +9,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Generator where
+module Servant.Benchmark.Internal.Generator where
 
 import Data.Kind (Type)
 import GHC.Base (Nat, Symbol)

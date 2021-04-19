@@ -1,4 +1,4 @@
-module Header where
+module Servant.Benchmark.Internal.Header where
 
 import Data.Aeson (Value)
 import qualified Data.Text as T

@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Endpoint where
+module Servant.Benchmark.Internal.Endpoint where
 
 import Control.Applicative ((<|>))
 import Data.Aeson (Value)
 import qualified Data.Text as T
-import Header (Header)
 import Network.HTTP.Types (Method)
+import Servant.Benchmark.Internal.Header (Header)
 
 {- | An API endpoint.
 -

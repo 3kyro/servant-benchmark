@@ -9,18 +9,18 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module HasEndpoint where
+module Servant.Benchmark.Internal.HasEndpoint where
 
 import Data.Aeson (ToJSON (toJSON))
 import Data.Data (Proxy (..))
 import Data.Kind (Type)
 import Data.List (foldl')
 import qualified Data.Text as T
-import Endpoint (Endpoint (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import Generator (Generator, (:>:) (..))
-import qualified Header as H
 import Servant.API
+import Servant.Benchmark.Internal.Endpoint (Endpoint (..))
+import Servant.Benchmark.Internal.Generator (Generator, (:>:) (..))
+import qualified Servant.Benchmark.Internal.Header as H
 import Test.QuickCheck (Arbitrary, generate, listOf)
 
 -- | HasEndpoint provides type level interpretation of an API Endpoint
