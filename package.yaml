@@ -38,19 +38,6 @@ library:
   ghc-options:
   - -Wall
 
-executables:
-  servant-benchmark-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    - -Wall
-    - -fprint-potential-instances
-    dependencies:
-    - servant-benchmark
-
 tests:
   servant-benchmark-test:
     main:                Spec.hs

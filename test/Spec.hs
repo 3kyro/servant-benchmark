@@ -13,7 +13,6 @@ import qualified Data.Text.Encoding as T
 import Network.HTTP.Types (hAuthorization, methodDelete, methodGet, methodPost, methodPut)
 import Servant
 import Servant.Benchmark
-import Servant.Benchmark.Internal.Endpoint (headers, method)
 import Test.Hspec
 import Test.QuickCheck (arbitrary)
 

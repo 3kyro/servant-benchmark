@@ -2,8 +2,11 @@ module Servant.Benchmark (
     HasGenerator (..),
     (:>:) (..),
     HasEndpoint (..),
+    Generator,
+    Endpoint (..),
 ) where
 
-import Servant.Benchmark.Internal.Generator
-import Servant.Benchmark.Internal.HasEndpoint (HasEndpoint (..))
-import Servant.Benchmark.Internal.HasGenerator
+import Servant.Benchmark.Endpoint
+import Servant.Benchmark.Generator
+import Servant.Benchmark.HasEndpoint (HasEndpoint (..))
+import Servant.Benchmark.HasGenerator

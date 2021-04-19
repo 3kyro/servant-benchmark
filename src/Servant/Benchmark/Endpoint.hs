@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Servant.Benchmark.Internal.Endpoint where
+module Servant.Benchmark.Endpoint where
 
 import Control.Applicative ((<|>))
 import Data.Aeson (Value)

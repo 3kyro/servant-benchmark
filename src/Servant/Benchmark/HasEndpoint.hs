@@ -9,9 +9,8 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Servant.Benchmark.Internal.HasEndpoint where
+module Servant.Benchmark.HasEndpoint where
 
-import Control.Monad (liftM2)
 import Data.Aeson (ToJSON (toJSON))
 import Data.Data (Proxy (..))
 import Data.Kind (Type)
@@ -19,9 +18,9 @@ import Data.List (foldl')
 import qualified Data.Text as T
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Servant.API
+import Servant.Benchmark.Endpoint (Endpoint (..), mkHeader)
+import Servant.Benchmark.Generator (Generator, (:>:) (..))
 import Servant.Benchmark.Internal.BasicAuth (encodeBasicAuth)
-import Servant.Benchmark.Internal.Endpoint (Endpoint (..), mkHeader)
-import Servant.Benchmark.Internal.Generator (Generator, (:>:) (..))
 import Test.QuickCheck (generate, listOf)
 
 -- | HasEndpoint provides type level interpretation of an API Endpoint
