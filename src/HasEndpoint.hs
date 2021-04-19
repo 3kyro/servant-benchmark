@@ -18,20 +18,15 @@ import Data.List (foldl')
 import qualified Data.Text as T
 import Endpoint (Endpoint (..))
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
+import Generator (Generator, (:>:) (..))
 import qualified Header as H
-import Servant.API (Capture, CaptureAll, EmptyAPI, Header, HttpVersion, QueryFlag, QueryParams, ReflectMethod (reflectMethod), ReqBody, Verb, (:>))
-import Test.QuickCheck (Arbitrary (arbitrary), generate)
+import Servant.API
+import Test.QuickCheck (Arbitrary, generate, listOf)
 
--- | An Endpoint in the interpreted API
+-- | HasEndpoint provides type level interpretation of an API Endpoint
 class HasEndpoint (api :: Type) where
-    getEndpoint :: Proxy (api :: Type) -> IO Endpoint
-
--- Endpoint parts are constructed using `:>`
-instance {-# OVERLAPPING #-} forall (a :: Type) (b :: Type). (HasEndpoint a, HasEndpoint b) => HasEndpoint (a :> b) where
-    getEndpoint _ = do
-        left <- getEndpoint (Proxy @a)
-        right <- getEndpoint (Proxy @b)
-        pure $ left <> right
+    getEndpoint :: Proxy (api :: Type) -> Generator api -> IO Endpoint
+    weight :: Proxy api -> Generator api -> Word
 
 instance
     {-# OVERLAPPING #-}
@@ -39,60 +34,10 @@ instance
     (KnownSymbol sym, HasEndpoint rest) =>
     HasEndpoint (sym :> rest)
     where
-    getEndpoint _ = do
-        let left = mempty{path = [T.pack $ symbolVal (Proxy @sym)]}
-        right <- getEndpoint (Proxy @rest)
-        pure $ left <> right
-
-instance
-    {-# OVERLAPPING #-}
-    forall (path :: Symbol) (sym :: Symbol) (rest :: Type).
-    (KnownSymbol path, KnownSymbol sym, HasEndpoint rest) =>
-    HasEndpoint (path :> QueryFlag sym :> rest)
-    where
-    getEndpoint _ = do
-        let left = mempty{path = [T.pack $ qPath ++ "?" ++ qFlag]}
-        right <- getEndpoint (Proxy @rest)
-        pure $ left <> right
-      where
-        qPath = symbolVal (Proxy @path)
-        qFlag = symbolVal (Proxy @sym)
-
-instance
-    {-# OVERLAPPING #-}
-    forall (path :: Symbol) (params :: Symbol) (a :: Type) (rest :: Type).
-    (KnownSymbol path, KnownSymbol params, Arbitrary a, Show a, HasEndpoint rest) =>
-    HasEndpoint (path :> QueryParams params [a] :> rest)
-    where
-    getEndpoint _ = do
-        let basePath = symbolVal (Proxy @path)
-        let queryPath = symbolVal (Proxy @params)
-        arbParams <- generate $ arbitrary @[a]
-        let queryParams = init $ foldl' (addParam queryPath) "" arbParams
-        let left = mempty{path = [T.pack $ basePath ++ "?" ++ queryParams]}
-        right <- getEndpoint (Proxy @rest)
-        pure $ left <> right
-      where
-        addParam :: String -> String -> a -> String
-        addParam root acc a =
-            acc ++ root ++ "[]=<" ++ show a ++ ">&"
-
--- CaptureAll: Ignore all capture parts for now
-instance {-# OVERLAPPING #-} forall (sym :: Symbol) (a :: Type). HasEndpoint (CaptureAll sym a) where
-    getEndpoint _ = mempty
-
-instance {-# OVERLAPPING #-} forall (sym :: Symbol) (a :: Type). HasEndpoint (Capture sym a) where
-    getEndpoint _ = mempty
-
-instance {-# OVERLAPPING #-} forall (sym :: Symbol) (a :: Type). (KnownSymbol sym, Arbitrary a, ToJSON a) => HasEndpoint (Header sym a) where
-    getEndpoint _ = do
-        let symbol = T.pack $ symbolVal (Proxy @sym)
-        value <- generate $ arbitrary @a
-        let header = H.MkHeader symbol $ toJSON value
-        pure $ mempty{headers = [header]}
-
-instance {-# OVERLAPPING #-} HasEndpoint HttpVersion where
-    getEndpoint _ = mempty
+    getEndpoint _ gen = do
+        (<>) mempty{path = [T.pack $ symbolVal (Proxy @sym)]}
+            <$> getEndpoint (Proxy @rest) gen
+    weight _ gen = weight (Proxy @rest) gen
 
 instance
     {-# OVERLAPPING #-}
@@ -100,12 +45,155 @@ instance
     (ReflectMethod method, Arbitrary a, ToJSON a) =>
     HasEndpoint (Verb method statusCode contentTypes a)
     where
-    getEndpoint _ = pure $ mempty{method = Just $ reflectMethod (Proxy @method)}
+    getEndpoint _ _ =
+        pure $
+            mempty
+                { method = Just $ reflectMethod (Proxy @method)
+                }
+    weight _ n = n
 
-instance {-# OVERLAPPING #-} forall contentTypes a. (Arbitrary a, ToJSON a) => HasEndpoint (ReqBody contentTypes a) where
-    getEndpoint _ = do
-        value <- generate (arbitrary @a)
-        pure $ mempty{requestValue = Just $ toJSON value}
+instance
+    {-# OVERLAPPING #-}
+    forall contentTypes a rest.
+    (Arbitrary a, ToJSON a, HasEndpoint rest) =>
+    HasEndpoint (ReqBody contentTypes a :> rest)
+    where
+    getEndpoint _ (genLeft :>: genRest) = do
+        value <- generate genLeft
+        (<>) mempty{body = Just $ toJSON value}
+            <$> getEndpoint (Proxy @rest) genRest
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
+instance
+    {-# OVERLAPPING #-}
+    forall (params :: Symbol) (a :: Type) (rest :: Type).
+    (KnownSymbol params, Arbitrary a, Show a, HasEndpoint rest) =>
+    HasEndpoint (QueryParams params a :> rest)
+    where
+    getEndpoint _ (genLeft :>: genRest) = do
+        let queryPath = symbolVal (Proxy @params)
+        arbParams <- generate $ listOf genLeft
+        let queryParams = init $ foldl' (addParam queryPath) "" arbParams
+        (<>) mempty{path = [T.pack $ "?" ++ queryParams]}
+            <$> getEndpoint (Proxy @rest) genRest
+      where
+        addParam :: String -> String -> a -> String
+        addParam root acc a =
+            acc ++ root ++ "[]=<" ++ show a ++ ">&"
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
+
+instance
+    {-# OVERLAPPING #-}
+    forall (sym :: Symbol) (rest :: Type).
+    (KnownSymbol sym, HasEndpoint rest) =>
+    HasEndpoint (QueryFlag sym :> rest)
+    where
+    getEndpoint _ gen =
+        (<>) mempty{path = [T.pack $ "?" ++ symbolVal (Proxy @sym)]}
+            <$> getEndpoint (Proxy @rest) gen
+    weight _ gen = weight (Proxy @rest) gen
+
+instance
+    {-# OVERLAPPING #-}
+    forall (sym :: Symbol) (a :: Type) (rest :: Type).
+    (Show a, HasEndpoint rest) =>
+    HasEndpoint (Capture sym a :> rest)
+    where
+    getEndpoint _ (gen :>: genRest) = do
+        value <- generate gen
+        (<>) mempty{path = [T.pack $ show value]} <$> getEndpoint (Proxy @rest) genRest
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
+
+-- CaptureAll: Ignore all capture parts for now
+instance
+    {-# OVERLAPPING #-}
+    forall (sym :: Symbol) (a :: Type) (rest :: Type).
+    (Show a, HasEndpoint rest) =>
+    HasEndpoint (CaptureAll sym a :> rest)
+    where
+    getEndpoint _ (gen :>: genRest) = do
+        value <- generate gen
+        (<>) mempty{path = [T.pack $ show value]} <$> getEndpoint (Proxy @rest) genRest
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
+
+instance
+    {-# OVERLAPPING #-}
+    forall (sym :: Symbol) (a :: Type) (rest :: Type).
+    (KnownSymbol sym, Arbitrary a, ToJSON a, HasEndpoint rest) =>
+    HasEndpoint (Header sym a :> rest)
+    where
+    getEndpoint _ (gen :>: genRest) = do
+        let symbol = T.pack $ symbolVal (Proxy @sym)
+        value <- generate gen
+        let header = H.MkHeader symbol $ toJSON value
+        (<>) mempty{headers = [header]} <$> getEndpoint (Proxy @rest) genRest
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
+
+instance
+    {-# OVERLAPPING #-}
+    forall (rest :: Type).
+    HasEndpoint rest =>
+    HasEndpoint (HttpVersion :> rest)
+    where
+    getEndpoint _ gen = getEndpoint (Proxy @rest) gen
+    weight _ gen = weight (Proxy @rest) gen
+
+-- Including EmptyAPI will always result in zero weight for the Endpoint
 instance HasEndpoint EmptyAPI where
     getEndpoint _ = pure mempty
+    weight _ _ = 0
+
+instance
+    forall (a :: Type) (rest :: Type).
+    (Show a, Arbitrary a, ToJSON a, HasEndpoint rest) =>
+    HasEndpoint (Fragment a :> rest)
+    where
+    getEndpoint _ (gen :>: genRest) = do
+        value <- generate gen
+        (<>) mempty{path = [T.pack $ '#' : show value]}
+            <$> getEndpoint (Proxy @rest) genRest
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
+
+instance
+    forall (rest :: Type).
+    HasEndpoint rest =>
+    HasEndpoint (RemoteHost :> rest)
+    where
+    getEndpoint _ gen = getEndpoint (Proxy @rest) gen
+    weight _ gen = weight (Proxy @rest) gen
+
+instance
+    forall (rest :: Type).
+    HasEndpoint rest =>
+    HasEndpoint (IsSecure :> rest)
+    where
+    getEndpoint _ gen = getEndpoint (Proxy @rest) gen
+    weight _ gen = weight (Proxy @rest) gen
+
+instance
+    forall (name :: Symbol) (sub :: [Type]) (api :: Type).
+    HasEndpoint api =>
+    HasEndpoint (WithNamedContext name sub api)
+    where
+    getEndpoint _ gen = getEndpoint (Proxy @api) gen
+    weight _ gen = weight (Proxy @api) gen
+
+instance
+    forall (sym :: Symbol) (rest :: Type).
+    HasEndpoint rest =>
+    HasEndpoint (Description sym :> rest)
+    where
+    getEndpoint _ gen = getEndpoint (Proxy @rest) gen
+    weight _ gen = weight (Proxy @rest) gen
+
+instance
+    forall (sym :: Symbol) (rest :: Type).
+    HasEndpoint rest =>
+    HasEndpoint (Summary sym :> rest)
+    where
+    getEndpoint _ gen = getEndpoint (Proxy @rest) gen
+    weight _ gen = weight (Proxy @rest) gen
+
+instance HasEndpoint Raw where
+    getEndpoint _ _ = mempty
+    weight _ n = n

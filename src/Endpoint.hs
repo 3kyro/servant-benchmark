@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Endpoint where
 
 import Control.Applicative ((<|>))
@@ -18,7 +20,7 @@ data Endpoint = MkEndpoint
       -- Only the first encountered request value is taken into consideration
       -- eg. "user" :> ReqBody '[JSON] Text :> ReqBody '[JSON] Int :> Get '[JSON] User
       -- will produce only a `Text` based request value
-      requestValue :: Maybe Value
+      body :: Maybe Value
     , headers :: [Header]
     }
     deriving (Show, Eq)
@@ -29,7 +31,7 @@ instance Semigroup Endpoint where
             (path a <> path b)
             (method a <> method b)
             -- left biased alternative for request value
-            (requestValue a <|> requestValue b)
+            (body a <|> body b)
             (headers a <> headers b)
 
 instance Monoid Endpoint where

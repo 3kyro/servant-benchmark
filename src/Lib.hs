@@ -1,7 +1,9 @@
 module Lib (
-    getAPI,
+    HasGenerator (..),
+    (:>:) (..),
     HasEndpoint (..),
 ) where
 
-import HasAPI (HasAPI (..))
+import Generator
 import HasEndpoint (HasEndpoint (..))
+import HasGenerator
