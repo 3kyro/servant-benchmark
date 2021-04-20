@@ -15,7 +15,8 @@ import Network.HTTP.Types.Header (Header)
 -
 -}
 data Endpoint = MkEndpoint
-    { -- All endpoint request paths
+    { name :: T.Text
+    , -- All endpoint request paths
       path :: [T.Text]
     , -- The endpoint request method
       method :: Maybe Method
@@ -31,6 +32,7 @@ data Endpoint = MkEndpoint
 instance Semigroup Endpoint where
     a <> b =
         MkEndpoint
+            (name a <> name b)
             (path a <> path b)
             (method a <> method b)
             -- left biased alternative for request value
@@ -38,7 +40,7 @@ instance Semigroup Endpoint where
             (headers a <> headers b)
 
 instance Monoid Endpoint where
-    mempty = MkEndpoint mempty mempty Nothing mempty
+    mempty = MkEndpoint mempty mempty mempty Nothing mempty
 
 -- Create a `Header` from a string and a value
 mkHeader :: Show a => String -> a -> Header

@@ -43,15 +43,16 @@ instance
 
 instance
     forall k (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type).
-    (ReflectMethod method) =>
+    ReflectMethod method =>
     HasEndpoint (Verb method statusCode contentTypes a)
     where
-    getEndpoint _ _ =
+    getEndpoint _ gen =
         pure $
             mempty
-                { method = Just $ reflectMethod (Proxy @method)
+                { name = fst gen
+                , method = Just $ reflectMethod (Proxy @method)
                 }
-    weight _ n = n
+    weight _ gen = snd gen
 
 instance
     forall (a :: Type) (rest :: Type).
@@ -145,7 +146,7 @@ instance
 
 -- Including EmptyAPI will always result in zero weight for the Endpoint
 instance HasEndpoint EmptyAPI where
-    getEndpoint _ = pure mempty
+    getEndpoint _ gen = pure mempty{name = fst gen}
     weight _ _ = 0
 
 instance
@@ -212,5 +213,5 @@ instance
     weight _ gen = weight (Proxy @rest) gen
 
 instance HasEndpoint Raw where
-    getEndpoint _ _ = mempty
-    weight _ n = n
+    getEndpoint _ gen = pure mempty{name = fst gen}
+    weight _ gen = snd gen

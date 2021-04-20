@@ -22,16 +22,16 @@ main = do
     basicAuthSpec
 
 generators =
-    12
-        :<|> arbitrary :>: 0
-        :<|> arbitrary :>: 1
-        :<|> arbitrary :>: 1
-        :<|> arbitrary :>: 1
-        :<|> 1
-        :<|> arbitrary :>: arbitrary :>: 1
-        :<|> arbitrary :>: arbitrary :>: 1
-        :<|> arbitrary :>: 1
-        :<|> 1
+    ("get", 12)
+        :<|> arbitrary :>: ("zero", 0)
+        :<|> arbitrary :>: ("first", 1)
+        :<|> arbitrary :>: ("third", 1)
+        :<|> arbitrary :>: ("context", 1)
+        :<|> ("capture", 1)
+        :<|> arbitrary :>: arbitrary :>: ("headers", 1)
+        :<|> arbitrary :>: arbitrary :>: ("summary", 1)
+        :<|> arbitrary :>: ("description", 1)
+        :<|> ("raw", 1)
 
 type API =
     "get" :> Get '[JSON] String
@@ -48,7 +48,6 @@ type API =
 generateSpec :: IO ()
 generateSpec = do
     endpoints <- liftIO $ generate (Proxy @API) generators
-    print endpoints
     hspec $
         describe "generate" $ do
             it "correctly retrieves endpoint weight and method" $ do
@@ -64,10 +63,22 @@ generateSpec = do
                                , Just methodGet
                                , Nothing
                                ]
+            it "correctly retrieves endpoint names" $ do
+                name <$> drop 11 endpoints
+                    `shouldBe` [ "get"
+                               , "first"
+                               , "third"
+                               , "context"
+                               , "capture"
+                               , "headers"
+                               , "summary"
+                               , "description"
+                               , "raw"
+                               ]
 
 type BasicAuthSpecAPI = BasicAuth "realm" User :> Get '[JSON] User
 
-basicAuthGenerator = fromUser :>: pure (MkUser "foo_user" "bar_pass") :>: 1
+basicAuthGenerator = fromUser :>: pure (MkUser "foo_user" "bar_pass") :>: ("basic auth", 1)
 data User = MkUser T.Text T.Text
 
 fromUser :: User -> BasicAuthData

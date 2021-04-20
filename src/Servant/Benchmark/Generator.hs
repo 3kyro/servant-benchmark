@@ -12,6 +12,7 @@
 module Servant.Benchmark.Generator where
 
 import Data.Kind (Type)
+import qualified Data.Text as T
 import GHC.Base (Nat, Symbol)
 import Servant.API
 import Test.QuickCheck (Gen)
@@ -22,7 +23,7 @@ infixr 9 :>:
 -- | a Generator provides value level interpretation of our API
 type family Generator (api :: Type) where
     Generator (a :<|> b) = Generator a :<|> Generator b
-    Generator (Verb (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type)) = Word
+    Generator (Verb (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type)) = (T.Text, Word)
     Generator (ReqBody '[JSON] (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (ReqBody '[PlainText] (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (QueryParams params a :> rest) = Gen a :>: Generator rest
@@ -33,7 +34,7 @@ type family Generator (api :: Type) where
     Generator (CaptureAll (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (Header (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (Fragment (a :: Type) :> rest) = Gen a :>: Generator rest
-    Generator EmptyAPI = Word
+    Generator EmptyAPI = (T.Text, Word)
     Generator (RemoteHost :> rest) = Generator rest
     Generator (IsSecure :> rest) = Generator rest
     Generator (WithNamedContext (name :: Symbol) (sub :: [Type]) (api :: Type)) = Generator api
@@ -41,4 +42,4 @@ type family Generator (api :: Type) where
         (userData -> BasicAuthData) :>: Gen userData :>: Generator rest
     Generator (Description (sym :: Symbol) :> rest) = Generator rest
     Generator (Summary (sym :: Symbol) :> rest) = Generator rest
-    Generator Raw = Word
+    Generator Raw = (T.Text, Word)

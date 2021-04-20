@@ -8,7 +8,7 @@ The `Generator` type must closely follow the structure of the *servant* API.
 
 * Different endpoints are combined with the `:<|>` operator
 * Different generators are combined with the `:>:` operator
-* Every endpoint must end with its corresponding weight of type `Word`
+* Every endpoint must end with a  `(Text, Word)` tuple consisting of the endpoint name and its corresponding weight
 * For every API combinator expecting a request value, a `Gen a` random value generator
   must be provided. The following combinators need a value generator:
     * `ReqBody`
@@ -22,6 +22,8 @@ The `Generator` type must closely follow the structure of the *servant* API.
 As an example, the following is a valid `Generator` for a contrived servant API
 
 ````haskell
+{-# LANGUAGE OverloadedStrings #-}
+
 type API = 
         "books" :> Get '[JSON] [Book]
         :<|> "view-my-referer" :> Header "from" Referer :> Get '[JSON] Referer
@@ -30,23 +32,23 @@ type API =
         :<|> Raw
 
 let generator =
-    1
-    :<|> arbitrary :>: 2
-    :<|> pure 1001 :>: arbitrary :>: 2
-    :<|> elements ["title", "contents", "post"] :>: 4
-    :<|> 0
+    ("books", 1)
+    :<|> arbitrary :>: ("referer", 2)
+    :<|> pure 1001 :>: arbitrary :>: ("users endpoint", 2)
+    :<|> elements ["title", "contents", "post"] :>: ("post", 4)
+    :<|> ("raw", 0)
 ````
 
-The first endpoint "books" does not require request data and so only the weight, 1 in this case, is
+The first endpoint "books" does not require request data and so only the name / weight tuple is
 provided.
 
 The "view-my-referer" endpoint requires a "from" header with an accompanying `Referer` value. Here
 we assume `Referer` has an `Arbitrary` instance to provide a random value. The endpoint generator
-finishes with the weight indication.
+finishes with the name/weight indication.
 
 The "users" endpoint requires two different request values. An Integer capture representing a user
 id as well as a `User` value. We hard-code the user id to `1001` using the monadic `pure` and assume that
-`User` has an `Arbitrary` instance to produce a random value. We finish with the endpoint's weight as necessary.
+`User` has an `Arbitrary` instance to produce a random value. We finish with the endpoint's name/weight as necessary.
 
 The "post" endpoint requires a `Text` query parameter. We provide a fixed set of possible values
 using the `elements` function from the `QuickCheck` package. With a weight of 4, four random values
@@ -69,7 +71,7 @@ toBasicAuthData :: User -> BasicAuthData
 toBasicAuthData user = ... 
 
 -- assuming `User` has an `Arbitrary` instance
-let generator = toBasicAuthData :>: arbitrary :>: 1
+let generator = toBasicAuthData :>: arbitrary :>: ("basicAuth", 1)
 ````
 
 The information will be encoded as an `Authorization` header.
