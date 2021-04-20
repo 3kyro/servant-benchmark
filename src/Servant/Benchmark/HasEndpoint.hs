@@ -130,7 +130,7 @@ instance
     HasEndpoint (Header sym a :> rest)
     where
     getEndpoint _ (gen :>: genRest) = do
-        let symbol = symbolVal (Proxy @sym)
+        let symbol = T.pack $ symbolVal (Proxy @sym)
         value <- generate gen
         let header = mkHeader symbol value
         (<>) mempty{headers = [header]} <$> getEndpoint (Proxy @rest) genRest

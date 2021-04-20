@@ -32,6 +32,7 @@ dependencies:
 - warp
 - base64-bytestring
 - bytestring
+- yaml
 
 library:
   source-dirs: src

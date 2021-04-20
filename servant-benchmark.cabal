@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 79412fdca860c91950e55ecef241de5fe49046906a329bd8f367bfde87932b84
+-- hash: 128d152d85c5619e3b696d5769120f40918d5904c726fa922ca7d08d9964d7b2
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Servant.Benchmark
+      Servant.Benchmark.Drill
       Servant.Benchmark.Endpoint
       Servant.Benchmark.Generator
       Servant.Benchmark.HasEndpoint
@@ -51,6 +52,7 @@ library
     , text
     , utf8-string
     , warp
+    , yaml
   default-language: Haskell2010
 
 test-suite servant-benchmark-test
@@ -76,4 +78,5 @@ test-suite servant-benchmark-test
     , text
     , utf8-string
     , warp
+    , yaml
   default-language: Haskell2010

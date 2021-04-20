@@ -13,6 +13,7 @@ import qualified Data.Text.Encoding as T
 import Network.HTTP.Types (hAuthorization, methodDelete, methodGet, methodPost, methodPut)
 import Servant
 import Servant.Benchmark
+import qualified Servant.Benchmark.Drill as D
 import Test.Hspec
 import Test.QuickCheck (arbitrary)
 
@@ -20,9 +21,10 @@ main :: IO ()
 main = do
     generateSpec
     basicAuthSpec
+    encodeSpec
 
 generators =
-    ("get", 12)
+    ("get", 3)
         :<|> arbitrary :>: ("zero", 0)
         :<|> arbitrary :>: ("first", 1)
         :<|> arbitrary :>: ("third", 1)
@@ -51,9 +53,9 @@ generateSpec = do
     hspec $
         describe "generate" $ do
             it "correctly retrieves endpoint weight and method" $ do
-                let gets = take 12 endpoints
-                method <$> gets `shouldBe` replicate 12 (Just methodGet)
-                drop 12 (method <$> endpoints)
+                let gets = take 3 endpoints
+                method <$> gets `shouldBe` replicate 3 (Just methodGet)
+                drop 3 (method <$> endpoints)
                     `shouldBe` [ Just methodPost
                                , Just methodPut
                                , Just methodPut
@@ -64,7 +66,7 @@ generateSpec = do
                                , Nothing
                                ]
             it "correctly retrieves endpoint names" $ do
-                name <$> drop 11 endpoints
+                name <$> drop 2 endpoints
                     `shouldBe` [ "get"
                                , "first"
                                , "third"
@@ -93,3 +95,10 @@ basicAuthSpec =
                 endpointHeader <- headers . head <$> generate (Proxy @BasicAuthSpecAPI) basicAuthGenerator
                 let bs64 = BS8.pack "Basic " <> encode (fromString "foo_user:bar_pass")
                 endpointHeader `shouldBe` [(hAuthorization, bs64)]
+
+-- Produce a yaml output file for debugging
+encodeSpec :: IO ()
+encodeSpec = do
+    endpoints <- liftIO $ generate (Proxy @API) generators
+    let settings = D.MkSettings 4 "localhost" 3 3
+    BS8.writeFile "/home/kyro/repos/servant-benchmark/output.yaml" $ D.encode settings endpoints

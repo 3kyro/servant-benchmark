@@ -8,6 +8,7 @@ import qualified Data.ByteString as BS
 import Data.ByteString.UTF8 (fromString)
 import Data.CaseInsensitive (mk)
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import Network.HTTP.Types (Method)
 import Network.HTTP.Types.Header (Header)
 
@@ -43,6 +44,6 @@ instance Monoid Endpoint where
     mempty = MkEndpoint mempty mempty mempty Nothing mempty
 
 -- Create a `Header` from a string and a value
-mkHeader :: Show a => String -> a -> Header
+mkHeader :: Show a => T.Text -> a -> Header
 mkHeader name value =
-    (mk $ fromString name, fromString $ show value)
+    (mk $ T.encodeUtf8 name, T.encodeUtf8 $ T.pack $ show value)
