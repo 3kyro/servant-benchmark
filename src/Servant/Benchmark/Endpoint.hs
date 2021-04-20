@@ -3,9 +3,7 @@
 module Servant.Benchmark.Endpoint where
 
 import Control.Applicative ((<|>))
-import Data.Aeson (Value)
 import qualified Data.ByteString as BS
-import Data.ByteString.UTF8 (fromString)
 import Data.CaseInsensitive (mk)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -18,7 +16,7 @@ import Network.HTTP.Types.Header (Header)
 data Endpoint = MkEndpoint
     { name :: T.Text
     , -- All endpoint request paths
-      path :: [T.Text]
+      path :: T.Text
     , -- The endpoint request method
       method :: Maybe Method
     , -- | The request value, where applicable.
@@ -45,5 +43,5 @@ instance Monoid Endpoint where
 
 -- Create a `Header` from a string and a value
 mkHeader :: Show a => T.Text -> a -> Header
-mkHeader name value =
-    (mk $ T.encodeUtf8 name, T.encodeUtf8 $ T.pack $ show value)
+mkHeader ciname value =
+    (mk $ T.encodeUtf8 ciname, T.encodeUtf8 $ T.pack $ show value)

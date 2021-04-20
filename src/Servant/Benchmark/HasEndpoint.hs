@@ -37,7 +37,7 @@ instance
     HasEndpoint (sym :> rest)
     where
     getEndpoint _ gen = do
-        (<>) mempty{path = [T.pack $ symbolVal (Proxy @sym)]}
+        (<>) mempty{path = T.pack $ '/' : symbolVal (Proxy @sym)}
             <$> getEndpoint (Proxy @rest) gen
     weight _ gen = weight (Proxy @rest) gen
 
@@ -85,7 +85,7 @@ instance
         let queryPath = symbolVal (Proxy @params)
         arbParams <- generate $ listOf genLeft
         let queryParams = init $ foldl' (addParam queryPath) "" arbParams
-        (<>) mempty{path = [T.pack $ "?" ++ queryParams]}
+        (<>) mempty{path = T.pack $ "?" ++ queryParams}
             <$> getEndpoint (Proxy @rest) genRest
       where
         addParam :: String -> String -> a -> String
@@ -99,7 +99,7 @@ instance
     HasEndpoint (QueryFlag sym :> rest)
     where
     getEndpoint _ gen =
-        (<>) mempty{path = [T.pack $ "?" ++ symbolVal (Proxy @sym)]}
+        (<>) mempty{path = T.pack $ "?" ++ symbolVal (Proxy @sym)}
             <$> getEndpoint (Proxy @rest) gen
     weight _ gen = weight (Proxy @rest) gen
 
@@ -110,7 +110,7 @@ instance
     where
     getEndpoint _ (gen :>: genRest) = do
         value <- generate gen
-        (<>) mempty{path = [T.pack $ show value]} <$> getEndpoint (Proxy @rest) genRest
+        (<>) mempty{path = T.pack $ '/' : show value} <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 -- CaptureAll: Ignore all capture parts for now
@@ -121,7 +121,7 @@ instance
     where
     getEndpoint _ (gen :>: genRest) = do
         value <- generate gen
-        (<>) mempty{path = [T.pack $ show value]} <$> getEndpoint (Proxy @rest) genRest
+        (<>) mempty{path = T.pack $ '/' : show value} <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
@@ -156,7 +156,7 @@ instance
     where
     getEndpoint _ (gen :>: genRest) = do
         value <- generate gen
-        (<>) mempty{path = [T.pack $ '#' : show value]}
+        (<>) mempty{path = T.pack $ '#' : show value}
             <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 

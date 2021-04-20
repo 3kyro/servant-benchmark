@@ -42,7 +42,7 @@ endpointToJSON endpoint =
         [ "name" .= name endpoint
         , "request"
             .= object
-                [ "url" .= T.concat (path endpoint)
+                [ "url" .= path endpoint
                 , "method" .= fmap T.decodeUtf8 (method endpoint)
                 , "body" .= fmap T.decodeUtf8 (body endpoint)
                 , "headers" .= object (headerToValue <$> headers endpoint)
