@@ -23,7 +23,8 @@ infixr 9 :>:
 type family Generator (api :: Type) where
     Generator (a :<|> b) = Generator a :<|> Generator b
     Generator (Verb (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type)) = Word
-    Generator (ReqBody (contentTypes :: [Type]) (a :: Type) :> rest) = Gen a :>: Generator rest
+    Generator (ReqBody '[JSON] (a :: Type) :> rest) = Gen a :>: Generator rest
+    Generator (ReqBody '[PlainText] (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (QueryParams params a :> rest) = Gen a :>: Generator rest
     Generator ((sym :: Symbol) :> rest) = Generator rest
     Generator (HttpVersion :> rest) = Generator rest

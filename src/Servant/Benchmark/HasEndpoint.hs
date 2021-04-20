@@ -11,7 +11,10 @@
 
 module Servant.Benchmark.HasEndpoint where
 
-import Data.Aeson (ToJSON (toJSON))
+import Data.Aeson (ToJSON)
+import qualified Data.Aeson as A
+import qualified Data.ByteString.Lazy.Char8 as BS
+import Data.ByteString.UTF8 (fromString)
 import Data.Data (Proxy (..))
 import Data.Kind (Type)
 import Data.List (foldl')
@@ -51,13 +54,24 @@ instance
     weight _ n = n
 
 instance
-    forall (contentTypes :: [Type]) (a :: Type) (rest :: Type).
+    forall (a :: Type) (rest :: Type).
     (ToJSON a, HasEndpoint rest) =>
-    HasEndpoint (ReqBody contentTypes a :> rest)
+    HasEndpoint (ReqBody '[JSON] a :> rest)
     where
     getEndpoint _ (genLeft :>: genRest) = do
         value <- generate genLeft
-        (<>) mempty{body = Just $ toJSON value}
+        (<>) mempty{body = Just $ BS.toStrict $ A.encode value}
+            <$> getEndpoint (Proxy @rest) genRest
+    weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
+
+instance
+    forall (a :: Type) (rest :: Type).
+    (Show a, HasEndpoint rest) =>
+    HasEndpoint (ReqBody '[PlainText] a :> rest)
+    where
+    getEndpoint _ (genLeft :>: genRest) = do
+        value <- generate genLeft
+        (<>) mempty{body = Just $ fromString $ show value}
             <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 

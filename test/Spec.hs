@@ -26,6 +26,7 @@ generators =
         :<|> arbitrary :>: 0
         :<|> arbitrary :>: 1
         :<|> arbitrary :>: 1
+        :<|> arbitrary :>: 1
         :<|> 1
         :<|> arbitrary :>: arbitrary :>: 1
         :<|> arbitrary :>: arbitrary :>: 1
@@ -35,7 +36,8 @@ generators =
 type API =
     "get" :> Get '[JSON] String
         :<|> "zero" :> ReqBody '[JSON] String :> Post '[JSON] String
-        :<|> "first" :> "second" :> ReqBody '[JSON] Int :> Put '[JSON] String
+        :<|> "first" :> "second" :> ReqBody '[JSON] Int :> Post '[JSON] String
+        :<|> "third" :> ReqBody '[PlainText] String :> Put '[JSON] String
         :<|> WithNamedContext "context" '[] ("time" :> QueryParams "seconds" Int :> Put '[JSON] Int)
         :<|> "capture" :> HttpVersion :> QueryFlag "flag" :> Get '[JSON] String
         :<|> "headers" :> IsSecure :> Header "first" String :> Header "second" Int :> Delete '[JSON] Int
@@ -46,13 +48,15 @@ type API =
 generateSpec :: IO ()
 generateSpec = do
     endpoints <- liftIO $ generate (Proxy @API) generators
+    print endpoints
     hspec $
         describe "generate" $ do
             it "correctly retrieves endpoint weight and method" $ do
                 let gets = take 12 endpoints
                 method <$> gets `shouldBe` replicate 12 (Just methodGet)
                 drop 12 (method <$> endpoints)
-                    `shouldBe` [ Just methodPut
+                    `shouldBe` [ Just methodPost
+                               , Just methodPut
                                , Just methodPut
                                , Just methodGet
                                , Just methodDelete

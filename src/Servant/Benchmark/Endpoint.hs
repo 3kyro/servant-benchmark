@@ -4,6 +4,7 @@ module Servant.Benchmark.Endpoint where
 
 import Control.Applicative ((<|>))
 import Data.Aeson (Value)
+import qualified Data.ByteString as BS
 import Data.ByteString.UTF8 (fromString)
 import Data.CaseInsensitive (mk)
 import qualified Data.Text as T
@@ -22,7 +23,7 @@ data Endpoint = MkEndpoint
       -- Only the first encountered request value is taken into consideration
       -- eg. "user" :> ReqBody '[JSON] Text :> ReqBody '[JSON] Int :> Get '[JSON] User
       -- will produce only a `Text` based request value
-      body :: Maybe Value
+      body :: Maybe BS.ByteString
     , headers :: [Header]
     }
     deriving (Show, Eq)
