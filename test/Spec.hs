@@ -30,8 +30,8 @@ generators =
         :<|> arbitrary :>: ("third", 1)
         :<|> arbitrary :>: ("context", 1)
         :<|> ("capture", 1)
-        :<|> arbitrary :>: arbitrary :>: ("headers", 1)
-        :<|> arbitrary :>: arbitrary :>: ("summary", 1)
+        :<|> pure "first value" :>: pure "second value" :>: ("headers", 1)
+        :<|> pure "first summary" :>: arbitrary :>: ("summary", 1)
         :<|> arbitrary :>: ("description", 1)
         :<|> ("raw", 1)
 
@@ -42,8 +42,8 @@ type API =
         :<|> "third" :> ReqBody '[PlainText] String :> Put '[JSON] String
         :<|> WithNamedContext "context" '[] ("time" :> QueryParams "seconds" Int :> Put '[JSON] Int)
         :<|> "capture" :> HttpVersion :> QueryFlag "flag" :> Get '[JSON] String
-        :<|> "headers" :> IsSecure :> Header "first" String :> Header "second" Int :> Delete '[JSON] Int
-        :<|> Summary "Summary" :> "capture" :> RemoteHost :> Capture "first" Int :> CaptureAll "second" String :> Post '[JSON] Int
+        :<|> "headers" :> IsSecure :> Header "first" String :> Header "second" String :> Delete '[JSON] Int
+        :<|> Summary "Summary" :> "capture" :> RemoteHost :> Capture "first" String :> CaptureAll "second" Int :> Post '[JSON] Int
         :<|> Description "description" :> "fragment" :> Fragment String :> Get '[JSON] String
         :<|> Raw
 

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 128d152d85c5619e3b696d5769120f40918d5904c726fa922ca7d08d9964d7b2
+-- hash: 32fd9645607da5f0904390ddccf14f7e11ece211d900eda7d6a421ae50f2a39c
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       Servant.Benchmark.HasEndpoint
       Servant.Benchmark.HasGenerator
       Servant.Benchmark.Internal.BasicAuth
+      Servant.Benchmark.ToText
   other-modules:
       Paths_servant_benchmark
   hs-source-dirs:
@@ -62,7 +63,7 @@ test-suite servant-benchmark-test
       Paths_servant_benchmark
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -fprint-potential-instances
   build-depends:
       QuickCheck
     , aeson

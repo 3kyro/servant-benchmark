@@ -39,6 +39,7 @@ library:
   ghc-options:
   - -Wall
 
+
 tests:
   servant-benchmark-test:
     main:                Spec.hs
@@ -47,6 +48,7 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -fprint-potential-instances
     dependencies:
     - servant-benchmark
     - hspec

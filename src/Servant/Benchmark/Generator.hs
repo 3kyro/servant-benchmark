@@ -1,13 +1,8 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE UndecidableInstances #-}
 
 module Servant.Benchmark.Generator where
 
@@ -30,6 +25,7 @@ type family Generator (api :: Type) where
     Generator ((sym :: Symbol) :> rest) = Generator rest
     Generator (HttpVersion :> rest) = Generator rest
     Generator (QueryFlag (sym :: Symbol) :> rest) = Generator rest
+    Generator (Capture (sym :: Symbol) String :> rest) = Gen String :>: Generator rest
     Generator (Capture (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (CaptureAll (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (Header (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest

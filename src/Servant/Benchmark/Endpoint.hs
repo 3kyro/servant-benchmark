@@ -34,7 +34,6 @@ instance Semigroup Endpoint where
             (name a <> name b)
             (path a <> path b)
             (method a <> method b)
-            -- left biased alternative for request value
             (body a <|> body b)
             (headers a <> headers b)
 
@@ -42,6 +41,6 @@ instance Monoid Endpoint where
     mempty = MkEndpoint mempty mempty mempty Nothing mempty
 
 -- Create a `Header` from a string and a value
-mkHeader :: Show a => T.Text -> a -> Header
-mkHeader ciname value =
-    (mk $ T.encodeUtf8 ciname, T.encodeUtf8 $ T.pack $ show value)
+mkHeader :: T.Text -> T.Text -> Header
+mkHeader ciName value =
+    (mk $ T.encodeUtf8 ciName, T.encodeUtf8 value)

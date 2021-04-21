@@ -1,7 +1,9 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -14,16 +16,17 @@ module Servant.Benchmark.HasEndpoint where
 import Data.Aeson (ToJSON)
 import qualified Data.Aeson as A
 import qualified Data.ByteString.Lazy.Char8 as BS
-import Data.ByteString.UTF8 (fromString)
 import Data.Data (Proxy (..))
 import Data.Kind (Type)
 import Data.List (foldl')
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import GHC.TypeLits (KnownSymbol, Nat, Symbol, symbolVal)
 import Servant.API
 import Servant.Benchmark.Endpoint (Endpoint (..), mkHeader)
 import Servant.Benchmark.Generator (Generator, (:>:) (..))
 import Servant.Benchmark.Internal.BasicAuth (encodeBasicAuth)
+import Servant.Benchmark.ToText
 import Test.QuickCheck (generate, listOf)
 
 -- | HasEndpoint provides type level interpretation of an API Endpoint
@@ -67,30 +70,30 @@ instance
 
 instance
     forall (a :: Type) (rest :: Type).
-    (Show a, HasEndpoint rest) =>
+    (ToText a, HasEndpoint rest) =>
     HasEndpoint (ReqBody '[PlainText] a :> rest)
     where
     getEndpoint _ (genLeft :>: genRest) = do
         value <- generate genLeft
-        (<>) mempty{body = Just $ fromString $ show value}
+        (<>) mempty{body = Just $ T.encodeUtf8 $ toText value}
             <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
     forall (params :: Symbol) (a :: Type) (rest :: Type).
-    (KnownSymbol params, Show a, HasEndpoint rest) =>
+    (KnownSymbol params, ToText a, HasEndpoint rest) =>
     HasEndpoint (QueryParams params a :> rest)
     where
     getEndpoint _ (genLeft :>: genRest) = do
-        let queryPath = symbolVal (Proxy @params)
+        let queryPath = T.pack $ symbolVal (Proxy @params)
         arbParams <- generate $ listOf genLeft
-        let queryParams = init $ foldl' (addParam queryPath) "" arbParams
-        (<>) mempty{path = T.pack $ "?" ++ queryParams}
+        let queryParams = T.init $ foldl' (addParam queryPath) "" arbParams
+        (<>) mempty{path = '?' `T.cons` queryParams}
             <$> getEndpoint (Proxy @rest) genRest
       where
-        addParam :: String -> String -> a -> String
+        addParam :: T.Text -> T.Text -> a -> T.Text
         addParam root acc a =
-            acc ++ root ++ "[]=<" ++ show a ++ ">&"
+            acc <> root <> "[]=<" <> toText a <> ">&"
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
@@ -105,34 +108,34 @@ instance
 
 instance
     forall (sym :: Symbol) (a :: Type) (rest :: Type).
-    (Show a, HasEndpoint rest) =>
+    (ToText a, HasEndpoint rest) =>
     HasEndpoint (Capture sym a :> rest)
     where
     getEndpoint _ (gen :>: genRest) = do
         value <- generate gen
-        (<>) mempty{path = T.pack $ '/' : show value} <$> getEndpoint (Proxy @rest) genRest
+        (<>) mempty{path = '/' `T.cons` toText value} <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 -- CaptureAll: Ignore all capture parts for now
 instance
     forall (sym :: Symbol) (a :: Type) (rest :: Type).
-    (Show a, HasEndpoint rest) =>
+    (ToText a, HasEndpoint rest) =>
     HasEndpoint (CaptureAll sym a :> rest)
     where
     getEndpoint _ (gen :>: genRest) = do
         value <- generate gen
-        (<>) mempty{path = T.pack $ '/' : show value} <$> getEndpoint (Proxy @rest) genRest
+        (<>) mempty{path = '/' `T.cons` toText value} <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
 instance
     forall (sym :: Symbol) (a :: Type) (rest :: Type).
-    (KnownSymbol sym, Show a, HasEndpoint rest) =>
+    (KnownSymbol sym, ToText a, HasEndpoint rest) =>
     HasEndpoint (Header sym a :> rest)
     where
     getEndpoint _ (gen :>: genRest) = do
         let symbol = T.pack $ symbolVal (Proxy @sym)
         value <- generate gen
-        let header = mkHeader symbol value
+        let header = mkHeader symbol $ toText value
         (<>) mempty{headers = [header]} <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 
@@ -151,12 +154,12 @@ instance HasEndpoint EmptyAPI where
 
 instance
     forall (a :: Type) (rest :: Type).
-    (Show a, HasEndpoint rest) =>
+    (ToText a, HasEndpoint rest) =>
     HasEndpoint (Fragment a :> rest)
     where
     getEndpoint _ (gen :>: genRest) = do
         value <- generate gen
-        (<>) mempty{path = T.pack $ '#' : show value}
+        (<>) mempty{path = '#' `T.cons` toText value}
             <$> getEndpoint (Proxy @rest) genRest
     weight _ (_ :>: genRest) = weight (Proxy @rest) genRest
 

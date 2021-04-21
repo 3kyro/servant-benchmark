@@ -8,10 +8,10 @@ import Data.Aeson.Types (Pair, Value)
 import Data.ByteString (ByteString)
 import Data.CaseInsensitive (original)
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
 import qualified Data.Yaml as Y
 import Network.HTTP.Types (Header)
 import Servant.Benchmark.Endpoint
+import Servant.Benchmark.ToText
 
 data Settings = MkSettings
     { concurrency :: Word
@@ -43,16 +43,16 @@ endpointToJSON endpoint =
         , "request"
             .= object
                 [ "url" .= path endpoint
-                , "method" .= fmap T.decodeUtf8 (method endpoint)
-                , "body" .= fmap T.decodeUtf8 (body endpoint)
+                , "method" .= fmap toText (method endpoint)
+                , "body" .= fmap toText (body endpoint)
                 , "headers" .= object (headerToValue <$> headers endpoint)
                 ]
         ]
 
 headerToValue :: Header -> Pair
 headerToValue (headerName, value) =
-    T.decodeUtf8 (original headerName) .= show value
+    toText (original headerName) .= toText value
 
 encode :: Settings -> [Endpoint] -> ByteString
-encode sett endpoints =
-    Y.encode $ MkOutput sett endpoints
+encode settings endpoints =
+    Y.encode $ MkOutput settings endpoints
