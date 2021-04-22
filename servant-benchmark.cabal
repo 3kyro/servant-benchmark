@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 32fd9645607da5f0904390ddccf14f7e11ece211d900eda7d6a421ae50f2a39c
+-- hash: 4a86c90a7b5954fb1fc22ef7cf1a5a17fda4d7f33d6ede976d65af999aef1593
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -28,12 +28,12 @@ source-repository head
 library
   exposed-modules:
       Servant.Benchmark
-      Servant.Benchmark.Drill
+      Servant.Benchmark.BasicAuth
       Servant.Benchmark.Endpoint
       Servant.Benchmark.Generator
       Servant.Benchmark.HasEndpoint
       Servant.Benchmark.HasGenerator
-      Servant.Benchmark.Internal.BasicAuth
+      Servant.Benchmark.Tools.Drill
       Servant.Benchmark.ToText
   other-modules:
       Paths_servant_benchmark
@@ -47,6 +47,7 @@ library
     , base64-bytestring
     , bytestring
     , case-insensitive
+    , http-media
     , http-types
     , servant
     , servant-server
@@ -72,6 +73,7 @@ test-suite servant-benchmark-test
     , bytestring
     , case-insensitive
     , hspec
+    , http-media
     , http-types
     , servant
     , servant-benchmark

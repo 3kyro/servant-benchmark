@@ -13,7 +13,7 @@ import qualified Data.Text.Encoding as T
 import Network.HTTP.Types (hAuthorization, methodDelete, methodGet, methodPost, methodPut)
 import Servant
 import Servant.Benchmark
-import qualified Servant.Benchmark.Drill as D
+import qualified Servant.Benchmark.Tools.Drill as D
 import Test.Hspec
 import Test.QuickCheck (arbitrary)
 
@@ -25,15 +25,15 @@ main = do
 
 generators =
     ("get", 3)
-        :<|> arbitrary :>: ("zero", 0)
-        :<|> arbitrary :>: ("first", 1)
-        :<|> arbitrary :>: ("third", 1)
-        :<|> arbitrary :>: ("context", 1)
-        :<|> ("capture", 1)
-        :<|> pure "first value" :>: pure "second value" :>: ("headers", 1)
-        :<|> pure "first summary" :>: arbitrary :>: ("summary", 1)
-        :<|> arbitrary :>: ("description", 1)
-        :<|> ("raw", 1)
+        :|: arbitrary :>: ("zero", 0)
+        :|: arbitrary :>: ("first", 1)
+        :|: arbitrary :>: ("third", 1)
+        :|: arbitrary :>: ("context", 1)
+        :|: ("capture", 1)
+        :|: pure "first value" :>: pure "second value" :>: ("headers", 1)
+        :|: pure "first summary" :>: arbitrary :>: ("summary", 1)
+        :|: arbitrary :>: ("description", 1)
+        :|: ("raw", 1)
 
 type API =
     "get" :> Get '[JSON] String
@@ -101,4 +101,4 @@ encodeSpec :: IO ()
 encodeSpec = do
     endpoints <- liftIO $ generate (Proxy @API) generators
     let settings = D.MkSettings 4 "localhost" 3 3
-    BS8.writeFile "/home/kyro/repos/servant-benchmark/output.yaml" $ D.encode settings endpoints
+    D.export "/home/kyro/repos/servant-benchmark/output.yaml" settings endpoints

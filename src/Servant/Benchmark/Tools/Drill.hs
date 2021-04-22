@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Servant.Benchmark.Drill (Settings (..), encode) where
+{- |
+Support for the [Drill](https://github.com/fcsonline/drill) load testing application
+-}
+module Servant.Benchmark.Tools.Drill (Settings (..), export) where
 
 import Data.Aeson (ToJSON (..), object, (.=))
 import Data.Aeson.Types (Pair, Value)
-import Data.ByteString (ByteString)
 import Data.CaseInsensitive (original)
 import qualified Data.Text as T
 import qualified Data.Yaml as Y
@@ -13,6 +15,7 @@ import Network.HTTP.Types (Header)
 import Servant.Benchmark.Endpoint
 import Servant.Benchmark.ToText
 
+-- | Drill specific settings. See the project's [ documentation ](https://github.com/fcsonline/drill) for more details
 data Settings = MkSettings
     { concurrency :: Word
     , base :: T.Text
@@ -45,7 +48,9 @@ endpointToJSON endpoint =
                 [ "url" .= path endpoint
                 , "method" .= fmap toText (method endpoint)
                 , "body" .= fmap toText (body endpoint)
-                , "headers" .= object (headerToValue <$> headers endpoint)
+                , "headers"
+                    .= object
+                        (headerToValue <$> headers endpoint)
                 ]
         ]
 
@@ -53,6 +58,8 @@ headerToValue :: Header -> Pair
 headerToValue (headerName, value) =
     toText (original headerName) .= toText value
 
-encode :: Settings -> [Endpoint] -> ByteString
-encode settings endpoints =
-    Y.encode $ MkOutput settings endpoints
+-- | Export a benchmark file given a list of `Endpoint`s
+export :: FilePath -> Settings -> [Endpoint] -> IO ()
+export filepath settings endpoints = do
+    let output = MkOutput settings $ pack <$> endpoints
+    Y.encodeFile filepath output

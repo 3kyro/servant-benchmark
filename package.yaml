@@ -33,6 +33,7 @@ dependencies:
 - base64-bytestring
 - bytestring
 - yaml
+- http-media
 
 library:
   source-dirs: src

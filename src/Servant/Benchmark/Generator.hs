@@ -12,12 +12,41 @@ import GHC.Base (Nat, Symbol)
 import Servant.API
 import Test.QuickCheck (Gen)
 
+{- | Value level `Generator` combinator. Combine endpoint generators to build an API generator
+
+example:
+
+@
+-- The API we want to benchmark
+type API = "books" :> Get '[JSON] Book :<|> "authors" :> "authors" :> ReqBody '[PlainText] String :> Post '[JSON] [Author]
+
+generator :: Generator API
+generator = ("books", 1) :|: elements ["Cervantes", "Kant"] :>: ("authors", 2)
+@
+-}
+data (a :: Type) :|: (b :: Type) = a :|: b
+
+infixr 3 :|:
+
+{- | Value level `Generator` combinator. Build endpoint generators by combining `Gen` values with (description, weight) tuples
+
+ example:
+
+ @
+ -- A single endpoint API
+ type API = "authors" :> "authors" :> ReqBody '[PlainText] String :> Post '[JSON] [Author]
+
+generator :: Generator API
+generator = elements ["Cervantes", "Kant"] :>: ("authors", 2)
+@
+-}
 data (a :: Type) :>: (b :: Type) = a :>: b
+
 infixr 9 :>:
 
--- | a Generator provides value level interpretation of our API
+-- | A Generator provides value level interpretation of an API
 type family Generator (api :: Type) where
-    Generator (a :<|> b) = Generator a :<|> Generator b
+    Generator (a :<|> b) = Generator a :|: Generator b
     Generator (Verb (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type)) = (T.Text, Word)
     Generator (ReqBody '[JSON] (a :: Type) :> rest) = Gen a :>: Generator rest
     Generator (ReqBody '[PlainText] (a :: Type) :> rest) = Gen a :>: Generator rest

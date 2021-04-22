@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Servant.Benchmark.Internal.BasicAuth where
+module Servant.Benchmark.BasicAuth where
 
 import Data.ByteString.Base64 (encode)
 import Data.ByteString.Char8 as BS8
@@ -9,8 +9,9 @@ import Servant (BasicAuthData (..))
 import Test.QuickCheck (Gen)
 import Test.QuickCheck.Gen (generate)
 
--- Given a function from `a`  to `BasicAuthData`, produce an authorization header from a
--- random value of `a`
+{- | Given a function (a -> BasicAuthData), produce an authorization header from a
+ random value of `a`
+-}
 encodeBasicAuth :: (a -> BasicAuthData) -> Gen a -> IO Header
 encodeBasicAuth f gen = do
     basicAuthData <- f <$> generate gen
