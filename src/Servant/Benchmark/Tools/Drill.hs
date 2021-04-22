@@ -8,9 +8,11 @@ module Servant.Benchmark.Tools.Drill (Settings (..), export) where
 
 import Data.Aeson (ToJSON (..), object, (.=))
 import Data.Aeson.Types (Pair, Value)
+import qualified Data.ByteString as BS
 import Data.CaseInsensitive (original)
+import Data.Ord (comparing)
 import qualified Data.Text as T
-import qualified Data.Yaml as Y
+import qualified Data.Yaml.Pretty as Y
 import Network.HTTP.Types (Header)
 import Servant.Benchmark.Endpoint
 import Servant.Benchmark.ToText
@@ -62,4 +64,15 @@ headerToValue (headerName, value) =
 export :: FilePath -> Settings -> [Endpoint] -> IO ()
 export filepath settings endpoints = do
     let output = MkOutput settings $ pack <$> endpoints
-    Y.encodeFile filepath output
+    let encoding = Y.encodePretty config output
+    BS.writeFile filepath encoding
+
+config :: Y.Config
+config =
+    Y.setConfCompare ordering Y.defConfig
+
+-- Explicit ordering for root Yaml fields
+ordering :: T.Text -> T.Text -> Ordering
+ordering "plan" _ = GT
+ordering _ "plan" = LT
+ordering t1 t2 = comparing T.length t1 t2
