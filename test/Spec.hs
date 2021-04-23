@@ -14,6 +14,7 @@ import Network.HTTP.Types (hAuthorization, methodDelete, methodGet, methodPost, 
 import Servant
 import Servant.Benchmark
 import qualified Servant.Benchmark.Tools.Drill as D
+import qualified Servant.Benchmark.Tools.Siege as Siege
 import Test.Hspec
 import Test.QuickCheck (arbitrary)
 
@@ -22,6 +23,7 @@ main = do
     generateSpec
     basicAuthSpec
     encodeSpec
+    siegeOutput
 
 generators =
     ("get", 3)
@@ -102,3 +104,8 @@ encodeSpec = do
     endpoints <- liftIO $ generate (Proxy @API) generators
     let settings = D.MkSettings 4 "localhost" 3 3
     D.export "/home/kyro/repos/servant-benchmark/output.yaml" settings endpoints
+siegeOutput :: IO ()
+siegeOutput = do
+    endpoints <- liftIO $ generate (Proxy @API) generators
+    let settings = Siege.MkSettings "localhost"
+    Siege.export "/home/kyro/repos/servant-benchmark/siege.output" settings endpoints
