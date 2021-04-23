@@ -35,5 +35,5 @@ serialize (MkSettings rootPath) endpoint =
 -}
 export :: FilePath -> Settings -> [Endpoint] -> IO ()
 export file settings endpoints = do
-    let serialized = BS8.unlines $ filter (not . BS8.null) $ map (serialize settings) endpoints
+    let serialized = BS8.unlines $ filter (not . BS8.null) $ map (serialize settings . pack) endpoints
     BS.writeFile file serialized
