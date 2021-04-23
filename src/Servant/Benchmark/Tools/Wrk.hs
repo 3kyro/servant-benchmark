@@ -11,31 +11,24 @@ In order to provide wrk the request data, you can use a simple lua script as des
 
 An adapted version of the original script by Michael Czeraszkiewicz can be found in the project's [ repository ](https://github.com/3kyro/servant-benchmark/tree/main/scripts)
 -}
-module Servant.Benchmark.Tools.Wrk (export, Settings (..)) where
+module Servant.Benchmark.Tools.Wrk (export) where
 
 import Data.Aeson
 import Data.Aeson.Types (Pair)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
 import Data.CaseInsensitive (original)
-import qualified Data.Text as T
 import Network.HTTP.Types (Header)
 import Servant.Benchmark (Endpoint (..))
 import Servant.Benchmark.Endpoint (pack)
 import Servant.Benchmark.ToText
 
--- | WRK specific settings.
-newtype Settings = MkSettings
-    { -- | The application's root URL
-      root :: T.Text
-    }
-
-data Output = MkOutput Settings Endpoint
+newtype Output = MkOutput Endpoint
 
 instance ToJSON Output where
-    toJSON (MkOutput settings endpoint) =
+    toJSON (MkOutput endpoint) =
         object
-            [ "path" .= (root settings <> path endpoint)
+            [ "path" .= path endpoint
             , "body" .= fmap toText (body endpoint)
             , "method" .= fmap toText (method endpoint)
             , "headers"
@@ -43,9 +36,9 @@ instance ToJSON Output where
                     (headerToValue <$> headers endpoint)
             ]
 
-    toEncoding (MkOutput settings endpoint) =
+    toEncoding (MkOutput endpoint) =
         pairs $
-            "path" .= (root settings <> path endpoint)
+            "path" .= path endpoint
                 <> "body" .= fmap toText (body endpoint)
                 <> "method" .= fmap toText (method endpoint)
                 <> "headers"
@@ -57,7 +50,7 @@ headerToValue (headerName, value) =
     toText (original headerName) .= toText value
 
 -- | Export a requests file given a list of `Endpoint`s
-export :: FilePath -> Settings -> [Endpoint] -> IO ()
-export filepath settings endpoints = do
-    let encoding = encode $ MkOutput settings . pack <$> endpoints
+export :: FilePath -> [Endpoint] -> IO ()
+export filepath endpoints = do
+    let encoding = encode $ MkOutput . pack <$> endpoints
     BS.writeFile filepath $ BSL.toStrict encoding
