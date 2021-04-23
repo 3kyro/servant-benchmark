@@ -1,10 +1,10 @@
 # servant-benchmark
 
-A library for automatically producing random request data from *Servant* APIs. 
+A library for producing random request data from *Servant* APIs. 
 
 ## Building a `Generator`
 
-The `Generator` type must closely follow the structure of the *servant* API. 
+The `Generator` type must closely follow the structure of the *Servant* API. 
 
 * Different endpoints are combined with the `:|:` operator
 * Different generators are combined with the `:>:` operator
@@ -39,6 +39,7 @@ type API =
         :<|> "post" :> QueryParam "segments" Text :> Get '[JSON] Post
         :<|> Raw
 
+generator :: Generator API
 let generator =
     ("books", 1)
     :|: arbitrary :>: ("referer", 2)
@@ -59,8 +60,8 @@ id as well as a `User` value. We hard-code the user id to `1001` using the monad
 `User` has an `Arbitrary` instance to produce a random value. We finish with the endpoint's name/weight as necessary.
 
 The "post" endpoint requires a `Text` query parameter. We provide a fixed set of possible values
-using the `elements` function from the `QuickCheck` package. With a weight of 4, four random values
-from the specified set will be produced.
+using the `elements` function from the `QuickCheck` package. With a weight of 4, four instances of
+the "post" endpoint will be produced, each with a random value from the specified set.
 
 Finally our API provides a `Raw` endpoint for serving static files, but we'd rather not benchmark
 it. Providing a 0 weight ensures that no request will be generated 

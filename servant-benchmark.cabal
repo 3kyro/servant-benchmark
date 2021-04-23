@@ -4,11 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 89f61ce47cf78e646749c48561ef6039d21785074ae47e8d33840e74683672b6
+-- hash: 5284f88b1c2544d38e7a184531efcdc9c9aea2ddf82b54d73ffe43aa5c44ed6e
 
 name:           servant-benchmark
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/servant-wrt#readme>
+description:    Please see the README on GitHub at <https://github.com/3kyro/servant-benchmark#README>
 homepage:       https://github.com/3kyro/servant-benchmark#readme
 bug-reports:    https://github.com/3kyro/servant-benchmark/issues
 author:         Kyriakos Papachrysanthou
