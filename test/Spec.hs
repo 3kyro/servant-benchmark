@@ -15,6 +15,7 @@ import Servant
 import Servant.Benchmark
 import qualified Servant.Benchmark.Tools.Drill as D
 import qualified Servant.Benchmark.Tools.Siege as Siege
+import qualified Servant.Benchmark.Tools.Wrk as Wrk
 import Test.Hspec
 import Test.QuickCheck (arbitrary)
 
@@ -22,8 +23,6 @@ main :: IO ()
 main = do
     generateSpec
     basicAuthSpec
-    encodeSpec
-    siegeOutput
 
 generators =
     ("get", 3)
@@ -97,15 +96,3 @@ basicAuthSpec =
                 endpointHeader <- headers . head <$> generate (Proxy @BasicAuthSpecAPI) basicAuthGenerator
                 let bs64 = BS8.pack "Basic " <> encode (fromString "foo_user:bar_pass")
                 endpointHeader `shouldBe` [(hAuthorization, bs64)]
-
--- Produce a yaml output file for debugging
-encodeSpec :: IO ()
-encodeSpec = do
-    endpoints <- liftIO $ generate (Proxy @API) generators
-    let settings = D.MkSettings 4 "localhost" 3 3
-    D.export "/home/kyro/repos/servant-benchmark/output.yaml" settings endpoints
-siegeOutput :: IO ()
-siegeOutput = do
-    endpoints <- liftIO $ generate (Proxy @API) generators
-    let settings = Siege.MkSettings "localhost"
-    Siege.export "/home/kyro/repos/servant-benchmark/siege.output" settings endpoints
