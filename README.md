@@ -6,14 +6,17 @@ A library for automatically producing random request data from *Servant* APIs.
 
 The `Generator` type must closely follow the structure of the *servant* API. 
 
-* Different endpoints are combined with the `:<|>` operator
+* Different endpoints are combined with the `:|:` operator
 * Different generators are combined with the `:>:` operator
 * Every endpoint must end with a  `(Text, Word)` tuple consisting of the endpoint name and its corresponding weight.
   Endpoint names are only used for additional information passed to the benchmark implementations
   and do not have to follow specific rules. That being said, generators for extensive APIs can get
   rather big and hard to read, so providing sensible naming could be very beneficial.  
-* For every API combinator expecting a request value, a `Gen a` random value generator
-  must be provided. The following combinators need a value generator:
+* The weight of an endpoint specifies the number of instances per testing run
+  of the API. Endpoints with 0 weight will be ignored.
+* For every API combinator expecting a request value, a `Gen a` random value generator from the
+  [QuickCheck](https://hackage.haskell.org/package/QuickCheck) package must be provided. 
+  The following combinators require a value generator:
     * `ReqBody`
     * `QueryParams`
     * `Capture`
@@ -26,6 +29,8 @@ As an example, the following is a valid `Generator` for a contrived servant API
 
 ````haskell
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeOperators #-}
 
 type API = 
         "books" :> Get '[JSON] [Book]
@@ -36,10 +41,10 @@ type API =
 
 let generator =
     ("books", 1)
-    :<|> arbitrary :>: ("referer", 2)
-    :<|> pure 1001 :>: arbitrary :>: ("users endpoint", 2)
-    :<|> elements ["title", "contents", "post"] :>: ("post", 4)
-    :<|> ("raw", 0)
+    :|: arbitrary :>: ("referer", 2)
+    :|: pure 1001 :>: arbitrary :>: ("users endpoint", 2)
+    :|: elements ["title", "contents", "post"] :>: ("post", 4)
+    :|: ("raw", 0)
 ````
 
 The first endpoint "books" does not require request data and so only the name / weight tuple is
@@ -78,6 +83,16 @@ let generator = toBasicAuthData :>: arbitrary :>: ("basicAuth", 1)
 ````
 
 The information will be encoded as an `Authorization` header.
+
+## Supported tools
+
+The following benchmarking tools are supported :
+
+- [Drill](https://github.com/fcsonline/drill)
+- [Siege](src/Servant/Benchmark/Tools/Siege.hs)
+
+If you'd like your favorite tool to be supported, don't hesitate to tell me so in an issue,
+or better yet submit a PR.
 
 ## Next steps
 
