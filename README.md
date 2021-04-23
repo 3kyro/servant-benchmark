@@ -89,6 +89,7 @@ The information will be encoded as an `Authorization` header.
 
 The following benchmarking tools are supported :
 
+- [wrk](https://github.com/wg/wrk)
 - [Drill](https://github.com/fcsonline/drill)
 - [Siege](src/Servant/Benchmark/Tools/Siege.hs)
 

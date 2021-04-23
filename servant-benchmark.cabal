@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5284f88b1c2544d38e7a184531efcdc9c9aea2ddf82b54d73ffe43aa5c44ed6e
+-- hash: 5806f089c3719be9d91f5aaf5e0501f2d374d0a96b63aee9de2c6bc0ef4b80af
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -35,6 +35,7 @@ library
       Servant.Benchmark.HasGenerator
       Servant.Benchmark.Tools.Drill
       Servant.Benchmark.Tools.Siege
+      Servant.Benchmark.Tools.Wrk
       Servant.Benchmark.ToText
   other-modules:
       Paths_servant_benchmark
