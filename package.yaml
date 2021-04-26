@@ -5,6 +5,8 @@ license:             BSD3
 author:              "Kyriakos Papachrysanthou"
 maintainer:          "papachrysanthou.k@gmaim.com"
 copyright:           "2021 Kyriakos Papachrysanthou"
+category:            "Web" 
+synopsis:            "Generate benchamrk files from a Servant API"
 
 extra-source-files:
 - README.md
