@@ -1,12 +1,12 @@
 name:                servant-benchmark
-version:             0.1.0.0
+version:             0.1.1.0
 github:              "3kyro/servant-benchmark"
 license:             BSD3
 author:              "Kyriakos Papachrysanthou"
-maintainer:          "papachrysanthou.k@gmaim.com"
+maintainer:          "papachrysanthou.k@gmail.com"
 copyright:           "2021 Kyriakos Papachrysanthou"
 category:            "Web" 
-synopsis:            "Generate benchamrk files from a Servant API"
+synopsis:            "Generate benchmark files from a Servant API"
 
 extra-source-files:
 - README.md

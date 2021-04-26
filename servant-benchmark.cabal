@@ -4,17 +4,17 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9f56c147463a61695fc2d6676052796cde29111cfa25450c97615c152f33c585
+-- hash: 905da9860e4d7baad7ee4aae3c7ae230b8f56f32f2e4f1f2d609250d4e11376e
 
 name:           servant-benchmark
-version:        0.1.0.0
-synopsis:       Generate benchamrk files from a Servant API
+version:        0.1.1.0
+synopsis:       Generate benchmark files from a Servant API
 description:    Please see the README on GitHub at <https://github.com/3kyro/servant-benchmark#README>
 category:       Web
 homepage:       https://github.com/3kyro/servant-benchmark#readme
 bug-reports:    https://github.com/3kyro/servant-benchmark/issues
 author:         Kyriakos Papachrysanthou
-maintainer:     papachrysanthou.k@gmaim.com
+maintainer:     papachrysanthou.k@gmail.com
 copyright:      2021 Kyriakos Papachrysanthou
 license:        BSD3
 license-file:   LICENSE
