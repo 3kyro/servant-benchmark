@@ -79,11 +79,11 @@ As an example, the following is a valid `Generator` for a contrived servant API
 
 @
 type API =
-        "books" :> Get '[JSON] [Book]
-        :<|> "view-my-referer" :> Header "from" Referer :> Get '[JSON] Referer
-        :<|> "users" :> Capture "userId" Integer :> ReqBody '[JSON] User :> Put '[JSON] User
-        :<|> "post" :> QueryParam "segments" Text :> Get '[JSON] Post
-        :<|> Raw
+    "books" :> Get '[JSON] [Book]
+    :<|> "view-my-referer" :> Header "from" Referer :> Get '[JSON] Referer
+    :<|> "users" :> Capture "userId" Integer :> ReqBody '[JSON] User :> Put '[JSON] User
+    :<|> "post" :> QueryParam "segments" Text :> Get '[JSON] Post
+    :<|> Raw
 
 generator :: Generator API
 let generator =
