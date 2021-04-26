@@ -12,7 +12,7 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Network.HTTP.Types (parseMethod)
-import Servant
+import Servant.API.Verbs
 import Servant.Benchmark.Endpoint
 
 -- | Siege settings.

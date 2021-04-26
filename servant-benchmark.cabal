@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5806f089c3719be9d91f5aaf5e0501f2d374d0a96b63aee9de2c6bc0ef4b80af
+-- hash: 828f96028741207508211cd577de18381a716e7e7c94a45969459708d335ccd9
 
 name:           servant-benchmark
 version:        0.1.0.0
@@ -52,10 +52,7 @@ library
     , http-media
     , http-types
     , servant
-    , servant-server
     , text
-    , utf8-string
-    , warp
     , yaml
   default-language: Haskell2010
 
@@ -79,9 +76,6 @@ test-suite servant-benchmark-test
     , http-types
     , servant
     , servant-benchmark
-    , servant-server
     , text
-    , utf8-string
-    , warp
     , yaml
   default-language: Haskell2010

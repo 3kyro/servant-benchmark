@@ -5,7 +5,7 @@ module Servant.Benchmark.BasicAuth where
 import Data.ByteString.Base64 (encode)
 import Data.ByteString.Char8 as BS8
 import Network.HTTP.Types (Header, hAuthorization)
-import Servant (BasicAuthData (..))
+import Servant.API (BasicAuthData (..))
 import Test.QuickCheck (Gen)
 import Test.QuickCheck.Gen (generate)
 
