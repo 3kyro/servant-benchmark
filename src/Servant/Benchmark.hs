@@ -2,7 +2,7 @@
 
 {- | A library for producing random request data from Servant APIs.
 
-Please visit the project's [repository](https://github.com/3kyro/servant-benchmark) for more information.
+Visit the project's [repository](https://github.com/3kyro/servant-benchmark) for more information.
 -}
 module Servant.Benchmark (
     Generator,
