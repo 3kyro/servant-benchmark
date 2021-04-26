@@ -4,4 +4,8 @@
 
 - Fix Typos
 
+## 0.1.1.1
+
+- Fix missing dependency bounds
+
 ## Unreleased changes
