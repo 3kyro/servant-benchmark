@@ -131,26 +131,48 @@ let generator = toBasicAuthData :>: arbitrary :>: ("basicAuth", 1)
 
 The information will be encoded as an `Authorization` header.
 -}
-type family Generator (api :: Type) where
-    Generator (a :<|> b) = Generator a :|: Generator b
-    Generator (Verb (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type)) = (T.Text, Word)
-    Generator (ReqBody '[JSON] (a :: Type) :> rest) = Gen a :>: Generator rest
-    Generator (ReqBody '[PlainText] (a :: Type) :> rest) = Gen a :>: Generator rest
-    Generator (QueryParams params a :> rest) = Gen a :>: Generator rest
-    Generator ((sym :: Symbol) :> rest) = Generator rest
-    Generator (HttpVersion :> rest) = Generator rest
-    Generator (QueryFlag (sym :: Symbol) :> rest) = Generator rest
-    Generator (Capture (sym :: Symbol) String :> rest) = Gen String :>: Generator rest
-    Generator (Capture (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
-    Generator (CaptureAll (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
-    Generator (Header (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
-    Generator (Fragment (a :: Type) :> rest) = Gen a :>: Generator rest
-    Generator EmptyAPI = (T.Text, Word)
-    Generator (RemoteHost :> rest) = Generator rest
-    Generator (IsSecure :> rest) = Generator rest
-    Generator (WithNamedContext (name :: Symbol) (sub :: [Type]) (api :: Type)) = Generator api
+type family Generator (api :: Type)
+
+type instance Generator (a :<|> b) = Generator a :|: Generator b
+
+type instance Generator (Verb (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type)) = (T.Text, Word)
+
+type instance Generator (ReqBody '[JSON] (a :: Type) :> rest) = Gen a :>: Generator rest
+
+type instance Generator (ReqBody '[PlainText] (a :: Type) :> rest) = Gen a :>: Generator rest
+
+type instance Generator (QueryParams params a :> rest) = Gen a :>: Generator rest
+
+type instance Generator ((sym :: Symbol) :> rest) = Generator rest
+
+type instance Generator (HttpVersion :> rest) = Generator rest
+
+type instance Generator (QueryFlag (sym :: Symbol) :> rest) = Generator rest
+
+type instance Generator (Capture (sym :: Symbol) String :> rest) = Gen String :>: Generator rest
+
+type instance Generator (Capture (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
+
+type instance Generator (CaptureAll (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
+
+type instance Generator (Header (sym :: Symbol) (a :: Type) :> rest) = Gen a :>: Generator rest
+
+type instance Generator (Fragment (a :: Type) :> rest) = Gen a :>: Generator rest
+
+type instance Generator EmptyAPI = (T.Text, Word)
+
+type instance Generator (RemoteHost :> rest) = Generator rest
+
+type instance Generator (IsSecure :> rest) = Generator rest
+
+type instance Generator (WithNamedContext (name :: Symbol) (sub :: [Type]) (api :: Type)) = Generator api
+
+type instance
     Generator (BasicAuth (realm :: Symbol) (userData :: Type) :> rest) =
         (userData -> BasicAuthData) :>: Gen userData :>: Generator rest
-    Generator (Description (sym :: Symbol) :> rest) = Generator rest
-    Generator (Summary (sym :: Symbol) :> rest) = Generator rest
-    Generator Raw = (T.Text, Word)
+
+type instance Generator (Description (sym :: Symbol) :> rest) = Generator rest
+
+type instance Generator (Summary (sym :: Symbol) :> rest) = Generator rest
+
+type instance Generator Raw = (T.Text, Word)
