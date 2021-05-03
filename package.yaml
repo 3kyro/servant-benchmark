@@ -51,4 +51,7 @@ tests:
     - -fprint-potential-instances
     dependencies:
     - servant-benchmark
+    - servant
     - hspec
+    - bytestring
+    - utf8-string

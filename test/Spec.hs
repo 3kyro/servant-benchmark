@@ -8,10 +8,11 @@ import qualified Data.ByteString as BS
 import Data.ByteString.Base64 (decode, encode)
 import qualified Data.ByteString.Char8 as BS8
 import Data.ByteString.UTF8 (fromString)
+import Data.Proxy (Proxy (..))
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import Network.HTTP.Types (hAuthorization, methodDelete, methodGet, methodPost, methodPut)
-import Servant
+import Servant.API
 import Servant.Benchmark
 import qualified Servant.Benchmark.Tools.Drill as D
 import qualified Servant.Benchmark.Tools.Siege as Siege

@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4b296ff2aa4d7ae1eb06114f73e2e6c6edf0114a9c50b483668beae8e040dc77
+-- hash: 97fbadd563e6c1485fc3e7d49b4ed4cea36e5fcf76ac1c82b085d86a47e5dd1a
 
 name:           servant-benchmark
 version:        0.1.1.1
@@ -79,5 +79,6 @@ test-suite servant-benchmark-test
     , servant
     , servant-benchmark
     , text
+    , utf8-string
     , yaml
   default-language: Haskell2010
