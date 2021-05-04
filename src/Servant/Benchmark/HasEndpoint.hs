@@ -59,6 +59,22 @@ instance
                 }
     weight _ gen = snd gen
 
+-- Instance for common verbs that don't return content.
+-- A NoContentVerb is always the last part of the API and so does not continue the interpretation.
+-- As such the endpoint's description and weight are parsed here.
+instance
+    forall k (method :: k).
+    ReflectMethod method =>
+    HasEndpoint (NoContentVerb method)
+    where
+    getEndpoint _ gen =
+        pure $
+            mempty
+                { name = fst gen
+                , method = Just $ reflectMethod (Proxy @method)
+                }
+    weight _ gen = snd gen
+
 -- Instance for Request body combinators.
 -- A separate instance for each content type is provided.
 -- Instances exist for JSON and PLAINTEXT content types.

@@ -4,8 +4,7 @@
 {-# LANGUAGE TypeOperators #-}
 
 import Control.Monad.IO.Class (liftIO)
-import qualified Data.ByteString as BS
-import Data.ByteString.Base64 (decode, encode)
+import Data.ByteString.Base64 (encode)
 import qualified Data.ByteString.Char8 as BS8
 import Data.ByteString.UTF8 (fromString)
 import Data.Proxy (Proxy (..))
@@ -14,9 +13,6 @@ import qualified Data.Text.Encoding as T
 import Network.HTTP.Types (hAuthorization, methodDelete, methodGet, methodPost, methodPut)
 import Servant.API
 import Servant.Benchmark
-import qualified Servant.Benchmark.Tools.Drill as D
-import qualified Servant.Benchmark.Tools.Siege as Siege
-import qualified Servant.Benchmark.Tools.Wrk as Wrk
 import Test.Hspec
 import Test.QuickCheck (arbitrary)
 
@@ -25,6 +21,7 @@ main = do
     generateSpec
     basicAuthSpec
 
+generators :: Generator API
 generators =
     ("get", 3)
         :|: arbitrary :>: ("zero", 0)
@@ -35,6 +32,7 @@ generators =
         :|: pure "first value" :>: pure "second value" :>: ("headers", 1)
         :|: pure "first summary" :>: arbitrary :>: ("summary", 1)
         :|: arbitrary :>: ("description", 1)
+        :|: ("nocontentverb", 1)
         :|: ("raw", 1)
 
 type API =
@@ -47,6 +45,7 @@ type API =
         :<|> "headers" :> IsSecure :> Header "first" String :> Header "second" String :> Delete '[JSON] Int
         :<|> Summary "Summary" :> "capture" :> RemoteHost :> Capture "first" String :> CaptureAll "second" Int :> Post '[JSON] Int
         :<|> Description "description" :> "fragment" :> Fragment String :> Get '[JSON] String
+        :<|> "nocontentverb" :> DeleteNoContent
         :<|> Raw
 
 generateSpec :: IO ()
@@ -65,6 +64,7 @@ generateSpec = do
                                , Just methodDelete
                                , Just methodPost
                                , Just methodGet
+                               , Just methodDelete
                                , Nothing
                                ]
             it "correctly retrieves endpoint names" $ do
@@ -77,17 +77,19 @@ generateSpec = do
                                , "headers"
                                , "summary"
                                , "description"
+                               , "nocontentverb"
                                , "raw"
                                ]
 
 type BasicAuthSpecAPI = BasicAuth "realm" User :> Get '[JSON] User
 
+basicAuthGenerator :: Generator BasicAuthSpecAPI
 basicAuthGenerator = fromUser :>: pure (MkUser "foo_user" "bar_pass") :>: ("basic auth", 1)
 data User = MkUser T.Text T.Text
 
 fromUser :: User -> BasicAuthData
-fromUser (MkUser name pass) =
-    BasicAuthData (T.encodeUtf8 name) (T.encodeUtf8 pass)
+fromUser (MkUser usrName pass) =
+    BasicAuthData (T.encodeUtf8 usrName) (T.encodeUtf8 pass)
 
 basicAuthSpec :: IO ()
 basicAuthSpec =
