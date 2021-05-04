@@ -137,6 +137,8 @@ type instance Generator (a :<|> b) = Generator a :|: Generator b
 
 type instance Generator (Verb (method :: k) (statusCode :: Nat) (contentTypes :: [Type]) (a :: Type)) = (T.Text, Word)
 
+type instance Generator (NoContentVerb (method :: k)) = (T.Text, Word)
+
 type instance Generator (ReqBody '[JSON] (a :: Type) :> rest) = Gen a :>: Generator rest
 
 type instance Generator (ReqBody '[PlainText] (a :: Type) :> rest) = Gen a :>: Generator rest
