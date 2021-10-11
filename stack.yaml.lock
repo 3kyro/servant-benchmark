@@ -3,11 +3,24 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: aeson-2.0.1.0@sha256:ee0847af4d1fb9ece3f24f443d8d8406431c32688a57880314ac36617da937eb,6229
+    pantry-tree:
+      size: 37910
+      sha256: e7a9eec09f1ea56548b07c7e82b53bf32a974827ffc402d852c667b5f5d89efd
+  original:
+    hackage: aeson-2.0.1.0
+- completed:
+    hackage: yaml-0.11.7.0@sha256:bdc72a1f2eb7adc85d3dc8ff8b19d82319d3a4f2dd6847d1d161071cab6390c2,4936
+    pantry-tree:
+      size: 2044
+      sha256: 78740da227b412af7f63fbf277e47ea22a797e8ce18912d5450f9e88376b49ba
+  original:
+    hackage: yaml-0.11.7.0
 snapshots:
 - completed:
-    size: 567037
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/9.yaml
-    sha256: d7d8d5106e53d1669964bd8bd2b0f88a5ad192d772f5376384b76738fd992311
-  original:
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/9.yaml
+    size: 584682
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2021/10/7.yaml
+    sha256: 29d036e9afa1456e06f7260c8fd6d4b2925fb066b5003591c3a10ba9de76acbd
+  original: nightly-2021-10-07

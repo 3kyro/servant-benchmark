@@ -1,5 +1,5 @@
 name:                servant-benchmark
-version:             0.1.2.0
+version:             0.2.0.0
 github:              "3kyro/servant-benchmark"
 license:             BSD3
 author:              "Kyriakos Papachrysanthou"
@@ -22,7 +22,7 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/3kyro/servant-benchmark#README>
 
 dependencies:
-- base >= 4.7 && < 5
+- base >= 4.13 && < 5
 - text
 - servant
 - http-types

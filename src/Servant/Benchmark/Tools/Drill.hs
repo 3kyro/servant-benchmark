@@ -7,6 +7,7 @@ Support for the [Drill](https://github.com/fcsonline/drill) load testing applica
 module Servant.Benchmark.Tools.Drill (Settings (..), export) where
 
 import Data.Aeson (ToJSON (..), object, (.=))
+import Data.Aeson.Key (fromText)
 import Data.Aeson.Types (Pair, Value)
 import qualified Data.ByteString as BS
 import Data.CaseInsensitive (original)
@@ -58,7 +59,7 @@ endpointToJSON endpoint =
 
 headerToValue :: Header -> Pair
 headerToValue (headerName, value) =
-    toText (original headerName) .= toText value
+    fromText (toText (original headerName)) .= toText value
 
 -- | Export a benchmark file given a list of `Endpoint`s
 export :: FilePath -> Settings -> [Endpoint] -> IO ()

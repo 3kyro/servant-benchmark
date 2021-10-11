@@ -14,6 +14,7 @@ An adapted version of the original script by Michael Czeraszkiewicz can be found
 module Servant.Benchmark.Tools.Wrk (export) where
 
 import Data.Aeson
+import Data.Aeson.Key (fromText)
 import Data.Aeson.Types (Pair)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
@@ -47,7 +48,7 @@ instance ToJSON Output where
 
 headerToValue :: Header -> Pair
 headerToValue (headerName, value) =
-    toText (original headerName) .= toText value
+    fromText (toText (original headerName)) .= toText value
 
 -- | Export a requests file given a list of `Endpoint`s
 export :: FilePath -> [Endpoint] -> IO ()
